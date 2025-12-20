@@ -193,7 +193,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                                     boxShadow: '0 0 40px -10px rgba(99, 102, 241, 0.3)' // Glow effect
                                 }}
                             >
-                                <div className="p-2 space-y-1 max-h-60 overflow-y-auto">
+                                <div className="p-2 space-y-1 max-h-60 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                                     <p className="px-2 py-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider">
                                         Switch Account
                                     </p>
