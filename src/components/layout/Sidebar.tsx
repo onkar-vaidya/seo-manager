@@ -132,18 +132,27 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
 
                 {/* User Role Badge */}
                 <div className="p-4 border-t border-border">
-                    <div className="px-4 py-2 bg-background-surface rounded-lg">
-                        <p className="text-xs text-text-tertiary uppercase tracking-wide">
-                            {selectedMember ? 'Team Member' : 'Account Role'}
-                        </p>
-                        <p className="text-sm text-text-primary font-medium capitalize mt-1">
-                            {selectedMember ? selectedMember.role : userRole}
-                        </p>
-                        {selectedMember && (
-                            <p className="text-xs text-text-tertiary mt-1">
-                                {selectedMember.name}
+                    <div className="flex items-center gap-3 p-3 bg-background-surface/50 rounded-xl border border-border/50 hover:bg-background-surface hover:border-border transition-all group cursor-default">
+                        {/* Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-accent/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated">
+                            {selectedMember
+                                ? selectedMember.name.charAt(0).toUpperCase()
+                                : userRole.charAt(0).toUpperCase()
+                            }
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-text-primary truncate group-hover:text-accent transition-colors">
+                                {selectedMember ? selectedMember.name : 'My Account'}
                             </p>
-                        )}
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+                                <p className="text-xs text-text-tertiary font-medium capitalize truncate">
+                                    {selectedMember ? selectedMember.role : userRole}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </aside>
