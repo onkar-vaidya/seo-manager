@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { TeamMember } from '@/lib/team-member-types'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface SidebarProps {
     userRole: string
@@ -16,6 +17,11 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
     const pathname = usePathname()
     const router = useRouter()
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
+
+    // User Switcher State
+    const [showSwitcher, setShowSwitcher] = useState(false)
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+    const switcherRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const updateMember = () => {
@@ -31,17 +37,39 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
             }
         }
 
+        // Fetch team members for the switcher
+        const fetchTeamMembers = async () => {
+            const supabase = createClient()
+            const { data } = await supabase
+                .from('team_members')
+                .select('*')
+                .eq('is_active', true)
+                .order('name')
+
+            if (data) setTeamMembers(data)
+        }
+
         // Initial load
         updateMember()
+        fetchTeamMembers()
 
         // Listen for storage changes
         window.addEventListener('storage', updateMember)
         // Custom event for same-window updates
         window.addEventListener('team-member-updated', updateMember)
 
+        // Click outside listener
+        const handleClickOutside = (event: MouseEvent) => {
+            if (switcherRef.current && !switcherRef.current.contains(event.target as Node)) {
+                setShowSwitcher(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+
         return () => {
             window.removeEventListener('storage', updateMember)
             window.removeEventListener('team-member-updated', updateMember)
+            document.removeEventListener('mousedown', handleClickOutside)
         }
     }, [])
 
@@ -85,9 +113,13 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
         router.push('/login')
     }
 
-    const handleSwitchUser = () => {
-        localStorage.removeItem('selected_team_member')
-        window.location.reload()
+    const handleSwitch = (member: TeamMember) => {
+        localStorage.setItem('selected_team_member', JSON.stringify(member))
+        // Dispatch custom event to update UI immediately in other components
+        window.dispatchEvent(new Event('team-member-updated'))
+        // Force router refresh to ensure server components update if they depend on cookies/headers (though mostly client side here)
+        router.refresh()
+        setShowSwitcher(false)
     }
 
     const isActive = (href: string) => pathname === href
@@ -146,7 +178,58 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                 </nav>
 
                 {/* User Profile Card */}
-                <div className="p-4 border-t border-border mt-auto">
+                <div className="p-4 border-t border-border mt-auto relative" ref={switcherRef}>
+
+                    {/* Popover User Switcher */}
+                    <AnimatePresence>
+                        {showSwitcher && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: -10, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                transition={{ duration: 0.2 }}
+                                className="absolute bottom-full left-4 right-4 mb-2 bg-background-elevated/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-black/5"
+                                style={{
+                                    boxShadow: '0 0 40px -10px rgba(99, 102, 241, 0.3)' // Glow effect
+                                }}
+                            >
+                                <div className="p-2 space-y-1 max-h-60 overflow-y-auto">
+                                    <p className="px-2 py-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider">
+                                        Switch Account
+                                    </p>
+                                    {teamMembers.map((member) => (
+                                        <button
+                                            key={member.id}
+                                            onClick={() => handleSwitch(member)}
+                                            className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors
+                                                ${selectedMember?.id === member.id
+                                                    ? 'bg-accent/10 text-accent'
+                                                    : 'hover:bg-white/5 text-text-secondary hover:text-text-primary'
+                                                }
+                                            `}
+                                        >
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                                                ${selectedMember?.id === member.id
+                                                    ? 'bg-accent text-white shadow-sm'
+                                                    : 'bg-background-surface text-text-secondary'
+                                                }
+                                           `}>
+                                                {member.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="flex-1 text-left">
+                                                <p className="text-sm font-medium leading-none">{member.name}</p>
+                                                <p className="text-[10px] opacity-70 mt-0.5 capitalize">{member.role}</p>
+                                            </div>
+                                            {selectedMember?.id === member.id && (
+                                                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <div className="p-3 rounded-xl border border-white/5 bg-black/20 hover:bg-black/30 transition-all group">
                         <div className="flex items-center gap-3">
                             {/* Avatar - Updated Color */}
