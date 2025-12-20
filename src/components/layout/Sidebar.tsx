@@ -119,7 +119,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
         window.dispatchEvent(new Event('team-member-updated'))
         // Force router refresh to ensure server components update if they depend on cookies/headers (though mostly client side here)
         router.refresh()
-        setShowSwitcher(false)
+        setActivePopover(null)
     }
 
     const isActive = (href: string) => pathname === href
@@ -180,9 +180,85 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                 {/* User Profile Card */}
                 <div className="p-4 border-t border-border mt-auto relative" ref={switcherRef}>
 
+                    {/* Unified Popover */}
+                    <AnimatePresence mode="wait">
+                        {activePopover && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95, transformOrigin: 'bottom center' }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                transition={{ duration: 0.2, ease: "easeOut" }}
+                                className="absolute bottom-full left-0 w-full mb-3 bg-background-elevated/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-black/5"
+                                style={{
+                                    boxShadow: '0 0 40px -10px rgba(99, 102, 241, 0.3)',
+                                }}
+                            >
+                                {/* Switcher Content */}
+                                {activePopover === 'switch' && (
+                                    <div className="p-2 space-y-1 max-h-60 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                                        <p className="px-2 py-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider">
+                                            Switch Account
+                                        </p>
+                                        {teamMembers.map((member) => (
+                                            <button
+                                                key={member.id}
+                                                onClick={() => handleSwitch(member)}
+                                                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors group
+                                                    ${selectedMember?.id === member.id
+                                                        ? 'bg-accent/10 text-accent'
+                                                        : 'hover:bg-white/5 text-text-secondary hover:text-text-primary'
+                                                    }
+                                                `}
+                                            >
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-transform group-hover:scale-105
+                                                    ${selectedMember?.id === member.id
+                                                        ? 'bg-accent text-white shadow-sm'
+                                                        : 'bg-background-surface text-text-secondary'
+                                                    }
+                                               `}>
+                                                    {member.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div className="flex-1 text-left min-w-0">
+                                                    <p className="text-sm font-medium leading-none truncate">{member.name}</p>
+                                                    <p className="text-[10px] opacity-70 mt-0.5 capitalize truncate">{member.role}</p>
+                                                </div>
+                                                {selectedMember?.id === member.id && (
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
 
+                                {/* Sign Out Confirmation */}
+                                {activePopover === 'signout' && (
+                                    <div className="p-4 text-center">
+                                        <div className="w-10 h-10 bg-red-400/10 text-red-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <SignOutIcon className="w-5 h-5" />
+                                        </div>
+                                        <p className="text-sm font-medium text-text-primary mb-1">Sign Out?</p>
+                                        <p className="text-xs text-text-secondary mb-4">Are you sure you want to leave?</p>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setActivePopover(null)}
+                                                className="flex-1 px-3 py-2 rounded-lg text-xs font-medium text-text-secondary bg-background-surface hover:bg-background-elevated transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={handleSignOut}
+                                                className="flex-1 px-3 py-2 rounded-lg text-xs font-medium text-white bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+                                            >
+                                                Confirm
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                    <div className="p-3 rounded-xl border border-white/5 bg-black/20 hover:bg-black/30 transition-all group">
+                    <div className="p-3 rounded-xl border border-white/5 bg-black/20 hover:bg-black/30 transition-all group relative z-10">
                         <div className="flex items-center gap-3">
                             {/* Avatar - Updated Color */}
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated">
@@ -208,124 +284,80 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
 
                         {/* Actions Row - Merged Below */}
                         <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/40">
-                            <div className="flex-1 relative">
-                                <AnimatePresence>
-                                    {showSwitcher && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10, scale: 0.95, transformOrigin: 'bottom left' }}
-                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                            transition={{ duration: 0.2, ease: "easeOut" }}
-                                            className="absolute bottom-full left-0 w-[220px] mb-3 bg-background-elevated/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-black/5"
-                                            style={{
-                                                boxShadow: '0 0 40px -10px rgba(99, 102, 241, 0.3)'
-                                            }}
-                                        >
-                                            <div className="p-2 space-y-1 max-h-60 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                                                <p className="px-2 py-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider">
-                                                    Switch Account
-                                                </p>
-                                                {teamMembers.map((member) => (
-                                                    <button
-                                                        key={member.id}
-                                                        onClick={() => handleSwitch(member)}
-                                                        className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors group
-                                                            ${selectedMember?.id === member.id
-                                                                ? 'bg-accent/10 text-accent'
-                                                                : 'hover:bg-white/5 text-text-secondary hover:text-text-primary'
-                                                            }
-                                                        `}
-                                                    >
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-transform group-hover:scale-105
-                                                            ${selectedMember?.id === member.id
-                                                                ? 'bg-accent text-white shadow-sm'
-                                                                : 'bg-background-surface text-text-secondary'
-                                                            }
-                                                       `}>
-                                                            {member.name.charAt(0).toUpperCase()}
-                                                        </div>
-                                                        <div className="flex-1 text-left min-w-0">
-                                                            <p className="text-sm font-medium leading-none truncate">{member.name}</p>
-                                                            <p className="text-[10px] opacity-70 mt-0.5 capitalize truncate">{member.role}</p>
-                                                        </div>
-                                                        {selectedMember?.id === member.id && (
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                                                        )}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-
-                                <button
-                                    onClick={() => setShowSwitcher(!showSwitcher)}
-                                    className={`w-full flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium rounded-lg transition-all duration-300 overflow-hidden
-                                        ${showSwitcher
-                                            ? 'text-red-400 bg-red-400/10'
-                                            : 'text-text-secondary hover:text-text-primary hover:bg-background-elevated/50'
-                                        }
-                                    `}
-                                    title={showSwitcher ? "Close" : "Switch User"}
-                                >
-                                    <div className="relative w-4 h-4 flex items-center justify-center">
-                                        <AnimatePresence mode="wait">
-                                            {showSwitcher ? (
-                                                <motion.svg
-                                                    key="close-icon"
-                                                    initial={{ rotate: -90, opacity: 0 }}
-                                                    animate={{ rotate: 0, opacity: 1 }}
-                                                    exit={{ rotate: 90, opacity: 0 }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className="absolute w-3.5 h-3.5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                </motion.svg>
-                                            ) : (
-                                                <motion.div
-                                                    key="switch-icon"
-                                                    initial={{ rotate: 90, opacity: 0 }}
-                                                    animate={{ rotate: 0, opacity: 1 }}
-                                                    exit={{ rotate: -90, opacity: 0 }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className="absolute inset-0 flex items-center justify-center"
-                                                >
-                                                    <SwitchUserIcon className="w-3.5 h-3.5" />
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-
-                                    <AnimatePresence mode="popLayout">
-                                        {!showSwitcher ? (
-                                            <motion.span
-                                                key="label-switch"
-                                                initial={{ x: -10, opacity: 0 }}
-                                                animate={{ x: 0, opacity: 1 }}
-                                                exit={{ x: 20, opacity: 0 }} // Swoosh to the right
+                            <button
+                                onClick={() => setActivePopover(activePopover === 'switch' ? null : 'switch')}
+                                className={`flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium rounded-lg transition-all duration-300 overflow-hidden
+                                    ${activePopover === 'switch'
+                                        ? 'text-red-400 bg-red-400/10'
+                                        : 'text-text-secondary hover:text-text-primary hover:bg-background-elevated/50'
+                                    }
+                                `}
+                                title={activePopover === 'switch' ? "Close" : "Switch User"}
+                            >
+                                <div className="relative w-4 h-4 flex items-center justify-center">
+                                    <AnimatePresence mode="wait">
+                                        {activePopover === 'switch' ? (
+                                            <motion.svg
+                                                key="close-icon"
+                                                initial={{ rotate: -90, opacity: 0 }}
+                                                animate={{ rotate: 0, opacity: 1 }}
+                                                exit={{ rotate: 90, opacity: 0 }}
                                                 transition={{ duration: 0.2 }}
+                                                className="absolute w-3.5 h-3.5"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                             >
-                                                Switch
-                                            </motion.span>
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </motion.svg>
                                         ) : (
-                                            <motion.span
-                                                key="label-close"
-                                                initial={{ x: -10, opacity: 0 }}
-                                                animate={{ x: 0, opacity: 1 }}
-                                                exit={{ x: 10, opacity: 0 }}
+                                            <motion.div
+                                                key="switch-icon"
+                                                initial={{ rotate: 90, opacity: 0 }}
+                                                animate={{ rotate: 0, opacity: 1 }}
+                                                exit={{ rotate: -90, opacity: 0 }}
                                                 transition={{ duration: 0.2 }}
+                                                className="absolute inset-0 flex items-center justify-center"
                                             >
-                                                Close
-                                            </motion.span>
+                                                <SwitchUserIcon className="w-3.5 h-3.5" />
+                                            </motion.div>
                                         )}
                                     </AnimatePresence>
-                                </button>
-                            </div>
+                                </div>
+
+                                <AnimatePresence mode="popLayout">
+                                    {activePopover !== 'switch' ? (
+                                        <motion.span
+                                            key="label-switch"
+                                            initial={{ x: -10, opacity: 0 }}
+                                            animate={{ x: 0, opacity: 1 }}
+                                            exit={{ x: 20, opacity: 0 }} // Swoosh to the right
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            Switch
+                                        </motion.span>
+                                    ) : (
+                                        <motion.span
+                                            key="label-close"
+                                            initial={{ x: -10, opacity: 0 }}
+                                            animate={{ x: 0, opacity: 1 }}
+                                            exit={{ x: 10, opacity: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            Close
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
+                            </button>
+
                             <div className="w-px h-3 bg-border/40"></div>
+
                             <button
-                                onClick={handleSignOut}
-                                className="flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium text-text-secondary hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                                onClick={() => setActivePopover(activePopover === 'signout' ? null : 'signout')}
+                                className={`flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors
+                                    ${activePopover === 'signout'
+                                        ? 'text-red-400 bg-red-400/10'
+                                        : 'text-text-secondary hover:text-red-400 hover:bg-red-400/10'
+                                    }
+                                `}
                                 title="Sign Out"
                             >
                                 <SignOutIcon className="w-3.5 h-3.5" />
