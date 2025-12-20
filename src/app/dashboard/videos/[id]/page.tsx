@@ -72,18 +72,20 @@ export default async function VideoDetailPage({
             </div>
 
             {/* Header */}
-            <div className="space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                    <h1 className="text-4xl font-medium text-text-primary leading-tight">
+            <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <h1 className="text-2xl md:text-4xl font-medium text-text-primary leading-tight order-2 md:order-1">
                         {video.old_title}
                     </h1>
                     {/* Navigation Buttons */}
-                    <VideoNavigation currentVideoId={video.id} />
+                    <div className="order-1 md:order-2 w-full md:w-auto flex justify-end">
+                        <VideoNavigation currentVideoId={video.id} />
+                    </div>
                 </div>
 
                 {/* Video ID Badge with Buttons */}
-                <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex flex-wrap items-center gap-3">
                         <VideoIdBadge videoId={video.video_id} />
                         <SeoStatusToggle
                             videoId={video.id}

@@ -70,7 +70,7 @@ export default function AddVideoModal({
             />
 
             {/* Modal */}
-            <div className="relative glass rounded-xl p-6 max-w-md w-full space-y-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative glass rounded-xl p-6 max-w-2xl w-full space-y-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
                 <div className="space-y-1">
                     <h3 className="text-xl font-medium text-text-primary">
                         Add New Video
@@ -100,19 +100,60 @@ export default function AddVideoModal({
                     />
 
                     <Input
-                        label="Video Title"
-                        name="video_title"
-                        placeholder="Enter video title"
+                        label="Original Title (Old Title)"
+                        name="old_title"
+                        placeholder="Enter the original video title"
                         error={fieldErrors.video_title?.[0]}
                         required
                     />
 
-                    <Input
-                        label="Published Date"
-                        name="published_at"
-                        type="datetime-local"
-                        error={fieldErrors.published_at?.[0]}
-                    />
+                    <div className="space-y-4 pt-2 border-t border-border">
+                        <p className="text-sm font-medium text-text-secondary">SEO Data (Optional)</p>
+
+                        <Input
+                            label="Title Variant 1"
+                            name="title_v1"
+                            placeholder="Optimized title option 1"
+                        />
+                        <Input
+                            label="Title Variant 2"
+                            name="title_v2"
+                            placeholder="Optimized title option 2"
+                        />
+                        <Input
+                            label="Title Variant 3"
+                            name="title_v3"
+                            placeholder="Optimized title option 3"
+                        />
+
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-text-secondary block">
+                                Description
+                            </label>
+                            <textarea
+                                name="description"
+                                rows={4}
+                                className="w-full px-3 py-2 bg-background-surface border border-border rounded-lg 
+                                         text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 
+                                         focus:ring-accent/50 transition-smooth resize-y"
+                                placeholder="Video description..."
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-text-secondary block">
+                                Tags
+                            </label>
+                            <textarea
+                                name="tags"
+                                rows={2}
+                                className="w-full px-3 py-2 bg-background-surface border border-border rounded-lg 
+                                         text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 
+                                         focus:ring-accent/50 transition-smooth resize-y"
+                                placeholder="Tag 1, Tag 2, Tag 3 (comma separated)"
+                            />
+                        </div>
+                    </div>
 
                     <div className="flex items-center justify-end gap-3 pt-2">
                         <Button

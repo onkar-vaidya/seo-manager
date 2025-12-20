@@ -40,11 +40,23 @@ export async function createVideoCore({
     videoTitle,
     publishedAt,
     userId,
-    supabase
-}: CoreParams): Promise<VideoCreationResult> {
+    supabase,
+    // Optional new fields
+    titleV1,
+    titleV2,
+    titleV3,
+    description,
+    tags
+}: CoreParams & {
+    titleV1?: string,
+    titleV2?: string,
+    titleV3?: string,
+    description?: string,
+    tags?: string[]
+}): Promise<VideoCreationResult> {
     // 1. Check duplicate
     const { data: existingVideo } = await supabase
-        .from('videos')
+        .from('video_seo')
         .select('id')
         .eq('video_id', videoId)
         .single()
@@ -57,14 +69,22 @@ export async function createVideoCore({
         }
     }
 
-    // 2. Insert Video
+    // 2. Insert Video into video_seo
     const { data: video, error: videoError } = await supabase
-        .from('videos')
+        .from('video_seo')
         .insert({
             video_id: videoId,
-            video_title: videoTitle,
+            old_title: videoTitle, // Mapping 'videoTitle' input to 'old_title'
             channel_id: channelId,
             published_at: publishedAt,
+            // New fields
+            title_v1: titleV1 || null,
+            title_v2: titleV2 || null,
+            title_v3: titleV3 || null,
+            description: description || '',
+            tags: tags || [],
+            is_seo_done: false, // Default
+            created_by: userId
         })
         .select()
         .single()
@@ -78,31 +98,7 @@ export async function createVideoCore({
         }
     }
 
-    // 3. Create Initial SEO Version (v0)
-    const { error: seoError } = await supabase
-        .from('seo_versions')
-        .insert({
-            video_id: video.id,
-            version_number: 0,
-            title: videoTitle,
-            description: '',
-            tags: [],
-            is_active: true,
-            created_by: userId
-        })
-
-    if (seoError) {
-        // Validation/Constraint error - manual rollback
-        await supabase.from('videos').delete().eq('id', video.id)
-        console.error('Error creating SEO version:', seoError)
-        return {
-            success: false,
-            message: 'Failed to create initial SEO version',
-            errorType: 'database'
-        }
-    }
-
-    // 4. Create Default Task
+    // 3. Create Default Task
     const { error: taskError } = await supabase
         .from('tasks')
         .insert({
@@ -144,19 +140,30 @@ export async function createVideoWithDefaults(
 
     // 2. Parse and Validate Input
     const videoId = formData.get('video_id') as string
-    const videoTitle = formData.get('video_title') as string
+    const videoTitle = formData.get('old_title') as string // Changed to match UI/DB intent
     const publishedAtStr = formData.get('published_at') as string
+
+    // Parse new fields
+    const titleV1 = formData.get('title_v1') as string
+    const titleV2 = formData.get('title_v2') as string
+    const titleV3 = formData.get('title_v3') as string
+    const description = formData.get('description') as string
+    const tagsStr = formData.get('tags') as string
+
+    // Parse tags (comma separated)
+    const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : []
 
     const errors: CreateVideoState['errors'] = {}
 
     if (!videoId) errors.video_id = ['Video ID is required']
-    if (!videoTitle) errors.video_title = ['Title is required']
+    if (!videoTitle) errors.video_title = ['Original Title is required']
 
     if (Object.keys(errors).length > 0) {
         return { errors, message: 'Please correct the errors below' }
     }
 
-    const publishedAt = publishedAtStr ? new Date(publishedAtStr).toISOString() : null
+    // Default published_at to now if not provided (though we removed the input, so it will be null)
+    const publishedAt = publishedAtStr ? new Date(publishedAtStr).toISOString() : new Date().toISOString()
 
     try {
         // AnySupabaseClient cast needed because createClient returns a SupabaseClient<Database> 
@@ -164,10 +171,15 @@ export async function createVideoWithDefaults(
         const result = await createVideoCore({
             channelId,
             videoId,
-            videoTitle,
+            videoTitle, // This maps to old_title in core
             publishedAt,
             userId: user.id,
-            supabase: supabase as any
+            supabase: supabase as any,
+            titleV1,
+            titleV2,
+            titleV3,
+            description,
+            tags
         })
 
         if (!result.success) {

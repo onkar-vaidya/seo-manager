@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import AddVideoModal from './AddVideoModal'
 import ImportJsonModal from './ImportJsonModal'
+import ImportCsvModal from './ImportCsvModal'
 
 interface ChannelActionsProps {
     channelId: string
@@ -13,6 +14,7 @@ interface ChannelActionsProps {
 export default function ChannelActions({ channelId, userRole }: ChannelActionsProps) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+    const [isCsvModalOpen, setIsCsvModalOpen] = useState(false)
 
     if (userRole === 'viewer') {
         return null
@@ -25,6 +27,13 @@ export default function ChannelActions({ channelId, userRole }: ChannelActionsPr
                 onClick={() => setIsImportModalOpen(true)}
             >
                 Import JSON
+            </Button>
+
+            <Button
+                variant="ghost"
+                onClick={() => setIsCsvModalOpen(true)}
+            >
+                Import CSV
             </Button>
 
             <Button
@@ -43,6 +52,12 @@ export default function ChannelActions({ channelId, userRole }: ChannelActionsPr
             <ImportJsonModal
                 isOpen={isImportModalOpen}
                 onClose={() => setIsImportModalOpen(false)}
+                channelId={channelId}
+            />
+
+            <ImportCsvModal
+                isOpen={isCsvModalOpen}
+                onClose={() => setIsCsvModalOpen(false)}
                 channelId={channelId}
             />
         </div>

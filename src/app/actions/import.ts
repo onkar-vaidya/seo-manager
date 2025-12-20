@@ -13,7 +13,8 @@ export type BulkImportResult = {
 
 export async function importBulkVideos(
     channelId: string,
-    jsonContent: string
+    content: string,
+    format: 'json' | 'csv' = 'json'
 ): Promise<BulkImportResult> {
     const supabase = await createClient()
 
@@ -45,10 +46,62 @@ export async function importBulkVideos(
     }
 
     try {
-        const parsed = JSON.parse(jsonContent)
+        let videos: any[] = []
 
-        // Handle { results: [...] } wrapper
-        const videos = Array.isArray(parsed) ? parsed : (parsed.results || [])
+        if (format === 'json') {
+            const parsed = JSON.parse(content)
+            videos = Array.isArray(parsed) ? parsed : (parsed.results || [])
+        } else if (format === 'csv') {
+            // Simple CSV Parser
+            const lines = content.split(/\r?\n/).filter(line => line.trim())
+            if (lines.length < 2) {
+                return {
+                    total: 0,
+                    created: 0,
+                    skipped: 0,
+                    errors: [],
+                    message: 'Invalid CSV: No data rows found'
+                }
+            }
+
+            // Parse Headers (remove carriage returns and quotes)
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
+
+            // Expected headers mapping helper
+            const normalizeHeader = (h: string) => h.toLowerCase().replace(/\s+/g, '_').replace(/['"]/g, '')
+
+            videos = lines.slice(1).map((line) => {
+                // Handle comma within quotes for CSV standard-ish parsing
+                // Logic: split by comma but ignore commas inside quotes
+                const values: string[] = []
+                let inQuote = false
+                let val = ''
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i]
+                    if (char === '"' && line[i + 1] === '"') {
+                        val += '"'; i++; // escape quote
+                    } else if (char === '"') {
+                        inQuote = !inQuote
+                    } else if (char === ',' && !inQuote) {
+                        values.push(val.trim()); val = ''
+                    } else {
+                        val += char
+                    }
+                }
+                values.push(val.trim())
+
+                const row: any = {}
+                headers.forEach((header, index) => {
+                    if (values[index] !== undefined) {
+                        row[header] = values[index].replace(/^"|"$/g, '')
+                        // Try mapped key
+                        const normalized = normalizeHeader(header)
+                        row[normalized] = values[index].replace(/^"|"$/g, '')
+                    }
+                })
+                return row
+            })
+        }
 
         if (!Array.isArray(videos)) {
             return {
@@ -56,7 +109,7 @@ export async function importBulkVideos(
                 created: 0,
                 skipped: 0,
                 errors: [],
-                message: 'Invalid JSON: Root must be an array or have a "results" array'
+                message: 'Invalid Data Format'
             }
         }
 
@@ -64,19 +117,19 @@ export async function importBulkVideos(
         let skippedCount = 0
         const errors: { row: number; reason: string }[] = []
 
-        // Process sequentially to avoid race conditions
+        // Process sequentially
         for (let i = 0; i < videos.length; i++) {
             const row = videos[i]
             const rowIndex = i + 1
 
-            // Extract fields - support both naming conventions
-            const videoId = row['Video ID'] || row.video_id
-            const oldTitle = row['Old Title'] || row.old_title
-            const titleV1 = row['Title Variant 1'] || row.title_v1 || row.title_variant_1
-            const titleV2 = row['Title Variant 2'] || row.title_v2 || row.title_variant_2
-            const titleV3 = row['Title Variant 3'] || row.title_v3 || row.title_variant_3
-            const description = row['Description'] || row.description
-            const tags = row['Tags'] || row.tags
+            // Loose input matching for CSV headers
+            const videoId = row['video_id'] || row['Video ID'] || row['id']
+            const oldTitle = row['old_title'] || row['Old Title'] || row['title'] || row['Title'] || row['original_title']
+            const titleV1 = row['title_v1'] || row['Title Variant 1'] || row['title_variant_1'] || row['title 1']
+            const titleV2 = row['title_v2'] || row['Title Variant 2'] || row['title_variant_2'] || row['title 2']
+            const titleV3 = row['title_v3'] || row['Title Variant 3'] || row['title_variant_3'] || row['title 3']
+            const description = row['description'] || row['Description'] || row['desc']
+            const tags = row['tags'] || row['Tags'] || row['keywords'] || row['Keywords']
 
             // Validate required fields
             if (!videoId || !oldTitle) {
@@ -85,7 +138,7 @@ export async function importBulkVideos(
                 continue
             }
 
-            // Parse tags if it's a string
+            // Parse tags
             let tagsArray: string[] = []
             if (typeof tags === 'string') {
                 tagsArray = tags.split(',').map(t => t.trim()).filter(Boolean)

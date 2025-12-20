@@ -21,7 +21,7 @@ export default function DashboardLayoutClient({
 
     return (
         <TeamMemberProvider>
-            <div className="flex h-screen overflow-hidden bg-background">
+            <div className="flex h-screen supports-[height:100cqh]:h-[100cqh] supports-[height:100svh]:h-[100svh] overflow-hidden bg-background">
                 {/* Mobile Sidebar Overlay */}
                 {isSidebarOpen && (
                     <div
@@ -45,7 +45,7 @@ export default function DashboardLayoutClient({
                         onMenuClick={() => setIsSidebarOpen(true)}
                     />
 
-                    <main className="flex-1 overflow-y-auto w-full">
+                    <main className="flex-1 overflow-y-auto w-full scroll-smooth">
                         <div className="max-w-7xl mx-auto p-4 md:p-8">
                             {children}
                         </div>

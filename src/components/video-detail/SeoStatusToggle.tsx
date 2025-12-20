@@ -39,13 +39,14 @@ export default function SeoStatusToggle({ videoId, initialStatus }: SeoStatusTog
 
     const updateVideoInCache = (updatedVideo: any) => {
         // Update all videos cache
-        const allVideosCache = localStorage.getItem('all_videos_cache')
+        const allVideosCache = localStorage.getItem('all_videos_cache_v4')
         if (allVideosCache) {
             const videos = JSON.parse(allVideosCache)
+            // Preserve channel relation by spreading existing video + update
             const index = videos.findIndex((v: any) => v.id === updatedVideo.id)
             if (index !== -1) {
-                videos[index] = updatedVideo
-                localStorage.setItem('all_videos_cache', JSON.stringify(videos))
+                videos[index] = { ...videos[index], ...updatedVideo }
+                localStorage.setItem('all_videos_cache_v4', JSON.stringify(videos))
             }
         }
 

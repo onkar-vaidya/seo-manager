@@ -44,6 +44,14 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
 
 
 
+    // Calculate counts for filters based on current videos
+    const counts = useMemo(() => {
+        return {
+            done: videos.filter(v => v.is_seo_done).length,
+            notDone: videos.filter(v => v.is_seo_done !== true).length
+        }
+    }, [videos])
+
     const filteredVideos = useMemo(() => {
         return videos.filter(video => {
             // Filter by search query
@@ -138,7 +146,7 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
-                                Done
+                                Done ({counts.done})
                             </button>
                             <button
                                 onClick={() => setSeoFilter('not-done')}
@@ -150,7 +158,7 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                                Not Done
+                                Not Done ({counts.notDone})
                             </button>
                             {seoFilter !== 'all' && (
                                 <button
@@ -189,7 +197,7 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
                     {visibleVideos.map((video, index) => (
                         <div
                             key={video.id}
-                            className="animate-fade-in"
+                            style={{ contentVisibility: 'auto', containIntrinsicSize: '100px' }}
                         >
                             <VideoRow video={video} />
                         </div>

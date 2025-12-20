@@ -1,6 +1,5 @@
 import { memo } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { VideoSeo } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
@@ -11,12 +10,9 @@ interface VideoRowProps {
 function VideoRow({ video }: VideoRowProps) {
     return (
         <Link href={`/dashboard/videos/${video.id}`}>
-            <motion.div
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, ease: [0.4, 0.0, 0.2, 1] }}
-                className="glass rounded-lg p-5 transition-smooth
-                 hover:bg-background-surface/80 hover:border-border-hover
+            <div
+                className="bg-background-elevated border border-border rounded-lg p-5 transition-colors
+                 hover:bg-background-surface hover:border-border-hover
                  cursor-pointer group relative"
             >
                 <div className="flex items-start justify-between gap-6">
@@ -77,7 +73,7 @@ function VideoRow({ video }: VideoRowProps) {
                         </svg>
                     </div>
                 </div>
-            </motion.div>
+            </div>
         </Link>
     )
 }

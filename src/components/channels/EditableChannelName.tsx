@@ -90,10 +90,15 @@ export default function EditableChannelName({
                         Cancel
                     </button>
                 </div>
-                {error && (
-                    <p className="text-sm text-danger">{error}</p>
-                )}
-            </div>
+
+                {
+                    error && (
+                        <div className="p-2 bg-danger/10 border border-danger/20 rounded-lg text-sm text-danger animate-fade-in">
+                            {error}
+                        </div>
+                    )
+                }
+            </div >
         )
     }
 
