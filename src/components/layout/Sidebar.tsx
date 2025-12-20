@@ -146,8 +146,8 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                 </nav>
 
                 {/* User Profile Card */}
-                <div className="p-4 border-t border-border">
-                    <div className="p-3 bg-background-surface/50 rounded-xl border border-border/50 hover:bg-background-surface hover:border-border transition-all group">
+                <div className="p-4 border-t border-border mt-auto">
+                    <div className="p-3 rounded-xl border border-transparent hover:bg-background-surface hover:border-border/50 transition-all group">
                         <div className="flex items-center gap-3">
                             {/* Avatar - Updated Color */}
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated">
@@ -172,16 +172,16 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                         </div>
 
                         {/* Actions Row - Merged Below */}
-                        <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/50">
+                        <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/30 opacity-60 group-hover:opacity-100 transition-opacity">
                             <button
                                 onClick={handleSwitchUser}
-                                className="flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-background-elevated rounded-lg transition-colors"
+                                className="flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-background-elevated/50 rounded-lg transition-colors"
                                 title="Switch User"
                             >
                                 <SwitchUserIcon className="w-3.5 h-3.5" />
                                 <span>Switch</span>
                             </button>
-                            <div className="w-px h-4 bg-border/50"></div>
+                            <div className="w-px h-3 bg-border/40"></div>
                             <button
                                 onClick={handleSignOut}
                                 className="flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium text-text-secondary hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
