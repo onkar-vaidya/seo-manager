@@ -9,8 +9,8 @@ export default function VideosPage() {
     // Initialize with cached data immediately
     const getCachedVideos = () => {
         if (typeof window === 'undefined') return []
-        const cached = localStorage.getItem('all_videos_cache')
-        const cacheTimestamp = localStorage.getItem('all_videos_cache_time')
+        const cached = localStorage.getItem('all_videos_cache_v3')
+        const cacheTimestamp = localStorage.getItem('all_videos_cache_time_v3')
 
         if (cached && cacheTimestamp) {
             const cacheAge = Date.now() - parseInt(cacheTimestamp)
@@ -48,8 +48,8 @@ export default function VideosPage() {
 
     const loadAllVideos = async () => {
         // Check if we have cached videos
-        const cached = localStorage.getItem('all_videos_cache')
-        const cacheTimestamp = localStorage.getItem('all_videos_cache_time')
+        const cached = localStorage.getItem('all_videos_cache_v3')
+        const cacheTimestamp = localStorage.getItem('all_videos_cache_time_v3')
 
         // Use cache if it's less than 5 minutes old
         if (cached && cacheTimestamp) {
@@ -58,14 +58,14 @@ export default function VideosPage() {
                 console.log('Using cached videos')
                 setVideos(JSON.parse(cached))
                 setLoading(false)
-                return
+                // We keep fetching in background to update the cache
             }
         }
 
         // Fetch all videos in batches
         const supabase = createClient()
         // Fetch all videos at once (virtualization handles the rendering performance)
-        let batchSize = 2500
+        let batchSize = 1000
         let allVideos: any[] = []
         let offset = 0
         let hasMore = true
@@ -111,8 +111,8 @@ export default function VideosPage() {
         }
 
         // Cache the results
-        localStorage.setItem('all_videos_cache', JSON.stringify(allVideos))
-        localStorage.setItem('all_videos_cache_time', Date.now().toString())
+        localStorage.setItem('all_videos_cache_v3', JSON.stringify(allVideos))
+        localStorage.setItem('all_videos_cache_time_v3', Date.now().toString())
 
         setVideos(allVideos as any)
         setLoadingProgress(100)

@@ -42,6 +42,8 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
         fetchMembers()
     }, [])
 
+
+
     const filteredVideos = useMemo(() => {
         return videos.filter(video => {
             // Filter by search query
@@ -62,6 +64,12 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
             return matchesSearch && matchesSeoFilter && matchesMemberFilter
         })
     }, [videos, deferredSearchQuery, seoFilter, memberFilter])
+
+    // Update navigation queue in sessionStorage whenever the filtered list changes
+    useEffect(() => {
+        const queue = filteredVideos.map(v => v.id)
+        sessionStorage.setItem('video_queue', JSON.stringify(queue))
+    }, [filteredVideos])
 
     // Infinite scroll observer
     useEffect(() => {

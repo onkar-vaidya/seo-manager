@@ -7,6 +7,8 @@ import DeleteVideoButton from '@/components/video-detail/DeleteVideoButton'
 import SeoStatusToggle from '@/components/video-detail/SeoStatusToggle'
 import VideoIdBadge from '@/components/video-detail/VideoIdBadge'
 
+import VideoNavigation from '@/components/video-detail/VideoNavigation'
+
 export default async function VideoDetailPage({
     params,
 }: {
@@ -75,6 +77,8 @@ export default async function VideoDetailPage({
                     <h1 className="text-4xl font-medium text-text-primary leading-tight">
                         {video.old_title}
                     </h1>
+                    {/* Navigation Buttons */}
+                    <VideoNavigation currentVideoId={video.id} />
                 </div>
 
                 {/* Video ID Badge with Buttons */}
