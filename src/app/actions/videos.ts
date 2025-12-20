@@ -266,3 +266,71 @@ export async function deleteVideo(videoId: string, channelId: string) {
     revalidatePath(`/dashboard/channels/${channelId}`)
     return { success: true }
 }
+
+export type UpdateVideoData = {
+    title?: string
+    description?: string
+    is_seo_done?: boolean
+}
+
+/**
+ * Update video details
+ * Admin/Editor only
+ */
+export async function updateVideo(videoId: string, data: UpdateVideoData, channelId?: string) {
+    const supabase = await createClient()
+
+    // Check auth
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, message: 'Unauthorized' }
+
+    // Check role
+    const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
+
+    const isDev = process.env.NODE_ENV === 'development'
+    const role = roleData?.role || 'viewer'
+    const hasPermission = role === 'admin' || role === 'editor'
+
+    if (!isDev && !hasPermission) {
+        return { success: false, message: 'Forbidden: Only admins and editors can update videos' }
+    }
+
+    // Use admin client for DB operations to bypass RLS (Row Level Security)
+    // This ensures edits work even if specific user policies normally restrict updates
+    let dbClient = supabase
+    try {
+        dbClient = await createAdminClient()
+    } catch (e) {
+        console.warn('Admin client unavailable, falling back to user client', e)
+    }
+
+    // Mapping frontend fields to DB columns
+    // VideoSeo type uses 'old_title' for the title. 
+    const updatePayload: any = {}
+    if (data.title !== undefined) updatePayload.old_title = data.title
+    if (data.description !== undefined) updatePayload.description = data.description
+    if (data.is_seo_done !== undefined) updatePayload.is_seo_done = data.is_seo_done
+
+    updatePayload.updated_at = new Date().toISOString()
+
+    const { error } = await dbClient
+        .from('video_seo')
+        .update(updatePayload)
+        .eq('id', videoId)
+
+    if (error) {
+        console.error('Update Error:', error)
+        return { success: false, message: `Failed to update: ${error.message}` }
+    }
+
+    if (channelId) {
+        revalidatePath(`/dashboard/channels/${channelId}`)
+    }
+    revalidatePath('/dashboard/videos')
+
+    return { success: true }
+}

@@ -3,17 +3,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // List of available API keys for rotation
-const API_KEYS = [
-    'AIzaSyANz8WdXrgLAfNEb8Gsn1CHmwcpFSf8Q-M',
-    'AIzaSyBIQciV43vEVZ56pGnxNZkwsTzr0MRHoao',
-    'AIzaSyAn-OHu-fo5KZylXAND2THZlVZA9w-EQzU',
-    'AIzaSyBv0lQ35aPOoIJfSITPetOsfqBohMFYKgo',
-    'AIzaSyCqgtFxsFK2oFJZfB9ekD7-zaiH8wJ4lwA',
-    'AIzaSyCtkUabXuYZ30dAxt1L8mUGOejsZoQH2WY',
-    'AIzaSyDTDKQZuwxiOYoYk0HuJMjPRIj4lleKttI',
-    'AIzaSyASy9ch5Nwg0wVB108rhaPGOxvDvp63GFU',
-    'AIzaSyCPVkAbmEvvOB3GBzwREhLySCnNGhJqd4U'
-]
+// Keys are stored in .env.local as a comma-separated string
+const API_KEYS = (process.env.GEMINI_API_KEYS || '').split(',').filter(k => k.trim())
 
 export type ResearchState = {
     result?: string
