@@ -19,7 +19,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
 
     // User Switcher State
-    const [showSwitcher, setShowSwitcher] = useState(false)
+    const [activePopover, setActivePopover] = useState<'switch' | 'signout' | null>(null)
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
     const switcherRef = useRef<HTMLDivElement>(null)
 
@@ -61,7 +61,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
         // Click outside listener
         const handleClickOutside = (event: MouseEvent) => {
             if (switcherRef.current && !switcherRef.current.contains(event.target as Node)) {
-                setShowSwitcher(false)
+                setActivePopover(null)
             }
         }
         document.addEventListener('mousedown', handleClickOutside)
