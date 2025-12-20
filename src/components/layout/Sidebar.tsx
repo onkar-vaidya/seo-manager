@@ -257,8 +257,13 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                         {/* Actions Row - Merged Below */}
                         <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/40">
                             <button
-                                onClick={handleSwitchUser}
-                                className="flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-background-elevated/50 rounded-lg transition-colors"
+                                onClick={() => setShowSwitcher(!showSwitcher)}
+                                className={`flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors
+                                    ${showSwitcher
+                                        ? 'text-accent bg-accent/10'
+                                        : 'text-text-secondary hover:text-text-primary hover:bg-background-elevated/50'
+                                    }
+                                `}
                                 title="Switch User"
                             >
                                 <SwitchUserIcon className="w-3.5 h-3.5" />
