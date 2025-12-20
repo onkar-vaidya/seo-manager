@@ -135,8 +135,9 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
             `}>
                 {/* Logo & Close Button */}
                 <div className="h-16 flex items-center justify-between px-6 border-b border-border">
-                    <h2 className="text-lg font-medium text-text-primary px-2">
-                        SEO Manager <span className="text-accent text-sm">X SooperBlooper</span>
+                    <h2 className="flex items-center gap-2 text-lg font-medium text-text-primary px-2">
+                        <span>SEO Manager</span>
+                        <span className="text-accent text-sm font-normal opacity-80 decoration-dotted">X SooperBlooper</span>
                     </h2>
                     <button
                         onClick={onClose}
