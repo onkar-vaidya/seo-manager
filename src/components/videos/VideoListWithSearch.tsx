@@ -55,6 +55,17 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
 
     return (
         <div className="space-y-4">
+            {/* Results Count */}
+            <div className="flex items-center justify-between text-sm">
+                <p className="text-text-tertiary font-medium">
+                    {searchQuery || seoFilter !== 'all' || memberFilter !== 'all' ? (
+                        <>Showing {filteredVideos.length} of {videos.length} videos</>
+                    ) : (
+                        <>{videos.length} {videos.length === 1 ? 'video' : 'videos'}</>
+                    )}
+                </p>
+            </div>
+
             {/* Search and Filters */}
             {/* Search and Filters */}
             <div className="flex flex-col gap-4">
@@ -138,16 +149,7 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
                 </div>
             </div>
 
-            {/* Results Count */}
-            <div className="flex items-center justify-between text-sm">
-                <p className="text-text-tertiary">
-                    {searchQuery || seoFilter !== 'all' || memberFilter !== 'all' ? (
-                        <>Showing {filteredVideos.length} of {videos.length} videos</>
-                    ) : (
-                        <>{videos.length} {videos.length === 1 ? 'video' : 'videos'}</>
-                    )}
-                </p>
-            </div>
+
 
             {/* Video List */}
             {filteredVideos.length > 0 ? (

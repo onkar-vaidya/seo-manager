@@ -136,9 +136,7 @@ export default function VideosPage() {
                             </span>
                         </div>
                     )}
-                    <p className="text-sm text-text-tertiary">
-                        {videos.length} videos
-                    </p>
+
                 </div>
             </div>
 
