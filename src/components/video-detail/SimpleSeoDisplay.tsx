@@ -141,14 +141,17 @@ export default function SimpleSeoDisplay({ video }: SimpleSeoDisplayProps) {
             )}
 
             {/* Tags */}
-            {video.tags && video.tags.length > 0 && (
-                <section className="glass rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-medium text-text-tertiary uppercase tracking-wide">
-                            Tags
-                        </h2>
+            <section className="glass rounded-xl p-6">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-medium text-text-tertiary uppercase tracking-wide">
+                        Tags
+                    </h2>
+                    {video.tags && video.tags.length > 0 && (
                         <CopyButton text={video.tags.join(', ')} fieldName="tags" />
-                    </div>
+                    )}
+                </div>
+
+                {video.tags && video.tags.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                         {video.tags.map((tag, index) => (
                             <span
@@ -160,8 +163,12 @@ export default function SimpleSeoDisplay({ video }: SimpleSeoDisplayProps) {
                             </span>
                         ))}
                     </div>
-                </section>
-            )}
+                ) : (
+                    <p className="text-sm text-text-tertiary italic">
+                        No tags available
+                    </p>
+                )}
+            </section>
         </div>
     )
 }

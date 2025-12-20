@@ -6,6 +6,7 @@ import SimpleSeoDisplay from '@/components/video-detail/SimpleSeoDisplay'
 import DeleteVideoButton from '@/components/video-detail/DeleteVideoButton'
 import SeoStatusToggle from '@/components/video-detail/SeoStatusToggle'
 import VideoIdBadge from '@/components/video-detail/VideoIdBadge'
+import TaskPanel from '@/components/video-detail/TaskPanel'
 
 import VideoNavigation from '@/components/video-detail/VideoNavigation'
 
@@ -49,6 +50,13 @@ export default async function VideoDetailPage({
     if (videoError || !video) {
         notFound()
     }
+
+    // Fetch Task
+    const { data: task } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('video_id', id)
+        .single()
 
     return (
         <div className="max-w-5xl mx-auto space-y-12">
@@ -99,12 +107,30 @@ export default async function VideoDetailPage({
             </div>
 
             {/* SEO Information - Simplified */}
-            <section className="space-y-4">
-                <h2 className="text-2xl font-medium text-text-primary">
-                    SEO Content
-                </h2>
-                <SimpleSeoDisplay video={video} />
-            </section>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-4">
+                    <h2 className="text-2xl font-medium text-text-primary">
+                        SEO Content
+                    </h2>
+                    <SimpleSeoDisplay video={video} />
+                </div>
+
+                <div className="space-y-4">
+                    <h2 className="text-2xl font-medium text-text-primary">
+                        Task Management
+                    </h2>
+                    {task ? (
+                        <TaskPanel
+                            task={task}
+                            currentUserInfo={{ id: user?.id || '', role: userRole }}
+                        />
+                    ) : (
+                        <div className="glass rounded-xl p-6 text-center text-text-secondary">
+                            <p>No task associated with this video.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }

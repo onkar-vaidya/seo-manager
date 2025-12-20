@@ -47,6 +47,7 @@ export async function updateChannelName(channelId: string, newName: string) {
     if (!user) throw new Error('Unauthorized')
 
     // Check role - admin only for channel management
+    // Check role - admin only for channel management
     const { data: roleData } = await supabase
         .from('user_roles')
         .select('role')
@@ -57,7 +58,10 @@ export async function updateChannelName(channelId: string, newName: string) {
     const role = roleData?.role || 'viewer'
     const isAdmin = role === 'admin'
 
+    console.log('[updateChannelName] User:', user.id, 'Role:', role, 'IsDev:', isDev)
+
     if (!isDev && !isAdmin) {
+        console.error('[updateChannelName] Forbidden. Role:', role)
         throw new Error('Forbidden: Only admins can rename channels')
     }
 
@@ -69,8 +73,9 @@ export async function updateChannelName(channelId: string, newName: string) {
     let dbClient = supabase
     try {
         dbClient = await createAdminClient()
+        console.log('[updateChannelName] Admin client created successfully')
     } catch (e) {
-        console.warn('Admin client unavailable, falling back to user client', e)
+        console.warn('[updateChannelName] Admin client unavailable, falling back to user client', e)
     }
 
     const { error } = await dbClient
@@ -79,6 +84,7 @@ export async function updateChannelName(channelId: string, newName: string) {
         .eq('id', channelId)
 
     if (error) {
+        console.error('[updateChannelName] Update failed:', error)
         throw new Error(`Failed to update channel: ${error.message}`)
     }
 
