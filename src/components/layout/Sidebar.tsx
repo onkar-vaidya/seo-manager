@@ -147,7 +147,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
 
                 {/* User Profile Card */}
                 <div className="p-4 border-t border-border mt-auto">
-                    <div className="p-3 rounded-xl border border-transparent hover:bg-background-surface hover:border-border/50 transition-all group">
+                    <div className="p-3 rounded-xl border border-border/40 bg-background-surface/30 hover:bg-background-surface hover:border-border/60 transition-all group">
                         <div className="flex items-center gap-3">
                             {/* Avatar - Updated Color */}
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated">
@@ -172,7 +172,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                         </div>
 
                         {/* Actions Row - Merged Below */}
-                        <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/30 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/40">
                             <button
                                 onClick={handleSwitchUser}
                                 className="flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-background-elevated/50 rounded-lg transition-colors"
