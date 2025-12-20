@@ -188,7 +188,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                 transition={{ duration: 0.2, ease: "easeOut" }}
-                                className="absolute bottom-full left-0 w-full mb-3 bg-background-elevated/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-black/5"
+                                className="absolute bottom-[60px] left-0 w-full bg-background-elevated/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-black/5"
                                 style={{
                                     boxShadow: '0 0 40px -10px rgba(99, 102, 241, 0.3)',
                                 }}
