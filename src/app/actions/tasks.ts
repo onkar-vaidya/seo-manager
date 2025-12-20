@@ -112,3 +112,53 @@ export async function assignTask(
     revalidatePath(`/dashboard/videos/${videoId}`)
     return { success: true }
 }
+
+export async function createTask(videoId: string) {
+    const supabase = await createClient()
+
+    // check auth
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Unauthorized')
+
+    // check role
+    const { data: userRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
+
+    if (!userRole || userRole.role === 'viewer') {
+        throw new Error('Forbidden')
+    }
+
+    // Use admin client for DB operations to bypass RLS
+    let dbClient = supabase
+    try {
+        dbClient = await createAdminClient()
+    } catch (e) {
+        console.warn('Admin client unavailable, falling back to user client', e)
+    }
+
+    // Create task
+    const { error } = await dbClient
+        .from('tasks')
+        .insert({
+            video_id: videoId,
+            status: 'pending',
+            assigned_to: null, // Unassigned initially
+        })
+
+    if (error) {
+        // Handle constraint violation (task already exists) gracefully
+        if (error.code === '23505') { // specific valid code for unique violation often used
+            // Or just check message content if code varies
+            console.log('Task already exists, ignoring.')
+            revalidatePath(`/dashboard/videos/${videoId}`)
+            return { success: true }
+        }
+        throw new Error(`Failed to create task: ${error.message}`)
+    }
+
+    revalidatePath(`/dashboard/videos/${videoId}`)
+    return { success: true }
+}

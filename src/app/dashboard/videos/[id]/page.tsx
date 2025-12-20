@@ -7,6 +7,7 @@ import DeleteVideoButton from '@/components/video-detail/DeleteVideoButton'
 import SeoStatusToggle from '@/components/video-detail/SeoStatusToggle'
 import VideoIdBadge from '@/components/video-detail/VideoIdBadge'
 import TaskPanel from '@/components/video-detail/TaskPanel'
+import InitializeTaskButton from '@/components/video-detail/InitializeTaskButton'
 
 import VideoNavigation from '@/components/video-detail/VideoNavigation'
 
@@ -126,7 +127,8 @@ export default async function VideoDetailPage({
                         />
                     ) : (
                         <div className="glass rounded-xl p-6 text-center text-text-secondary">
-                            <p>No task associated with this video.</p>
+                            <p className="mb-4">No task associated with this video.</p>
+                            <InitializeTaskButton videoId={id} />
                         </div>
                     )}
                 </div>
