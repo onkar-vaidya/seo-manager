@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { VideoSeo } from '@/lib/types'
@@ -7,7 +8,7 @@ interface VideoRowProps {
     video: VideoSeo
 }
 
-export default function VideoRow({ video }: VideoRowProps) {
+function VideoRow({ video }: VideoRowProps) {
     return (
         <Link href={`/dashboard/videos/${video.id}`}>
             <motion.div
@@ -80,3 +81,5 @@ export default function VideoRow({ video }: VideoRowProps) {
         </Link>
     )
 }
+
+export default memo(VideoRow)

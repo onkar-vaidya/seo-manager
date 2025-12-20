@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useDeferredValue } from 'react'
 import VideoRow from '@/components/videos/VideoRow'
 import { VideoSeo } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
@@ -12,10 +12,18 @@ interface VideoListWithSearchProps {
 type SeoFilter = 'all' | 'done' | 'not-done'
 
 export default function VideoListWithSearch({ videos }: VideoListWithSearchProps) {
+    const [visibleCount, setVisibleCount] = useState(20)
     const [searchQuery, setSearchQuery] = useState('')
+    const deferredSearchQuery = useDeferredValue(searchQuery) // Defer search updates
+
     const [seoFilter, setSeoFilter] = useState<SeoFilter>('all')
     const [memberFilter, setMemberFilter] = useState<string>('all')
     const [teamMembers, setTeamMembers] = useState<string[]>([])
+
+    // Reset visible count when filters change
+    useEffect(() => {
+        setVisibleCount(20)
+    }, [deferredSearchQuery, seoFilter, memberFilter])
 
     useEffect(() => {
         // Fetch team members for filter
@@ -34,39 +42,55 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
         fetchMembers()
     }, [])
 
-    const filteredVideos = videos.filter(video => {
-        // Filter by search query
-        const matchesSearch = video.video_id.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredVideos = useMemo(() => {
+        return videos.filter(video => {
+            // Filter by search query
+            const matchesSearch = video.video_id.toLowerCase().includes(deferredSearchQuery.toLowerCase())
 
-        // Filter by SEO status
-        const matchesSeoFilter =
-            seoFilter === 'all' ? true :
-                seoFilter === 'done' ? video.is_seo_done === true :
-                    video.is_seo_done !== true
+            // Filter by SEO status
+            const matchesSeoFilter =
+                seoFilter === 'all' ? true :
+                    seoFilter === 'done' ? video.is_seo_done === true :
+                        video.is_seo_done !== true
 
-        // Filter by assigned member
-        const matchesMemberFilter =
-            memberFilter === 'all' ? true :
-                memberFilter === 'unassigned' ? !video.assigned_to :
-                    video.assigned_to === memberFilter
+            // Filter by assigned member
+            const matchesMemberFilter =
+                memberFilter === 'all' ? true :
+                    memberFilter === 'unassigned' ? !video.assigned_to :
+                        video.assigned_to === memberFilter
 
-        return matchesSearch && matchesSeoFilter && matchesMemberFilter
-    })
+            return matchesSearch && matchesSeoFilter && matchesMemberFilter
+        })
+    }, [videos, deferredSearchQuery, seoFilter, memberFilter])
+
+    // Infinite scroll observer
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    setVisibleCount((prev) => prev + 20)
+                }
+            },
+            { threshold: 0.1, rootMargin: '100px' }
+        )
+
+        const sentinel = document.getElementById('scroll-sentinel')
+        if (sentinel) {
+            observer.observe(sentinel)
+        }
+
+        return () => observer.disconnect()
+    }, [filteredVideos.length, visibleCount])
+
+    const visibleVideos = filteredVideos.slice(0, visibleCount)
 
     return (
         <div className="space-y-4">
-            {/* Results Count */}
+            {/* Results Count - HIDDEN as per request */}
             <div className="flex items-center justify-between text-sm">
-                <p className="text-text-tertiary font-medium">
-                    {searchQuery || seoFilter !== 'all' || memberFilter !== 'all' ? (
-                        <>Showing {filteredVideos.length} of {videos.length} videos</>
-                    ) : (
-                        <>{videos.length} {videos.length === 1 ? 'video' : 'videos'}</>
-                    )}
-                </p>
+
             </div>
 
-            {/* Search and Filters */}
             {/* Search and Filters */}
             <div className="flex flex-col gap-4">
                 {/* Search Bar */}
@@ -152,17 +176,22 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
 
 
             {/* Video List */}
-            {filteredVideos.length > 0 ? (
+            {visibleVideos.length > 0 ? (
                 <div className="space-y-2">
-                    {filteredVideos.map((video, index) => (
+                    {visibleVideos.map((video, index) => (
                         <div
                             key={video.id}
                             className="animate-fade-in"
-                            style={{ animationDelay: `${Math.min(index * 20, 300)}ms` }}
                         >
                             <VideoRow video={video} />
                         </div>
                     ))}
+                    {/* Sentinel for infinite scroll */}
+                    {visibleCount < filteredVideos.length && (
+                        <div id="scroll-sentinel" className="h-20 flex items-center justify-center p-4">
+                            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="glass rounded-xl p-12 text-center animate-fade-in">

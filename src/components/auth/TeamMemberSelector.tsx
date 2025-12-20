@@ -13,6 +13,8 @@ export default function TeamMemberSelector({ onSelect }: TeamMemberSelectorProps
     const [loading, setLoading] = useState(true)
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
 
+    const [isConfirming, setIsConfirming] = useState(false)
+
     useEffect(() => {
         fetchTeamMembers()
     }, [])
@@ -33,8 +35,12 @@ export default function TeamMemberSelector({ onSelect }: TeamMemberSelectorProps
         setLoading(false)
     }
 
-    const handleSelect = () => {
+    const handleSelect = async () => {
         if (selectedMember) {
+            setIsConfirming(true)
+            // Small artificial delay to ensure the spinner is seen (optional, but good for UX feel)
+            await new Promise(resolve => setTimeout(resolve, 300))
+
             // Save to localStorage
             localStorage.setItem('selected_team_member', JSON.stringify(selectedMember))
             onSelect(selectedMember)
@@ -62,16 +68,17 @@ export default function TeamMemberSelector({ onSelect }: TeamMemberSelectorProps
                                 <button
                                     key={member.id}
                                     onClick={() => setSelectedMember(member)}
+                                    disabled={isConfirming}
                                     className={`w-full px-4 py-3 rounded-lg text-left transition-smooth ${selectedMember?.id === member.id
-                                            ? 'bg-accent text-white'
-                                            : 'bg-background-elevated text-text-primary hover:bg-background-surface'
-                                        }`}
+                                        ? 'bg-accent text-white'
+                                        : 'bg-background-elevated text-text-primary hover:bg-background-surface'
+                                        } ${isConfirming ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <span className="font-medium">{member.name}</span>
                                         <span className={`text-xs px-2 py-1 rounded ${member.role === 'admin'
-                                                ? 'bg-accent/20 text-accent'
-                                                : 'bg-background-surface text-text-tertiary'
+                                            ? 'bg-accent/20 text-accent'
+                                            : 'bg-background-surface text-text-tertiary'
                                             }`}>
                                             {member.role}
                                         </span>
@@ -82,12 +89,19 @@ export default function TeamMemberSelector({ onSelect }: TeamMemberSelectorProps
 
                         <button
                             onClick={handleSelect}
-                            disabled={!selectedMember}
+                            disabled={!selectedMember || isConfirming}
                             className="w-full px-6 py-3 bg-accent text-white rounded-lg font-medium
                                      hover:bg-accent/90 transition-smooth disabled:opacity-50 
-                                     disabled:cursor-not-allowed"
+                                     disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            Continue as {selectedMember?.name || '...'}
+                            {isConfirming ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span>Starting session...</span>
+                                </>
+                            ) : (
+                                <span>Continue as {selectedMember?.name || '...'}</span>
+                            )}
                         </button>
                     </>
                 )}

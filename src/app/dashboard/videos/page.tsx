@@ -64,7 +64,8 @@ export default function VideosPage() {
 
         // Fetch all videos in batches
         const supabase = createClient()
-        const batchSize = 1000
+        // Fetch all videos at once (virtualization handles the rendering performance)
+        let batchSize = 2500
         let allVideos: any[] = []
         let offset = 0
         let hasMore = true
@@ -96,6 +97,7 @@ export default function VideosPage() {
             if (batch && batch.length > 0) {
                 allVideos = [...allVideos, ...batch]
                 offset += batchSize
+
                 hasMore = batch.length === batchSize
 
                 // Update progress
