@@ -1,7 +1,7 @@
 'use client'
 
 import { User } from '@supabase/supabase-js'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useEffect } from 'react'
 import { TeamMember } from '@/lib/team-member-types'
@@ -9,9 +9,10 @@ import { TeamMember } from '@/lib/team-member-types'
 interface HeaderProps {
     user: User
     userRole: string
+    onMenuClick: () => void
 }
 
-export default function Header({ user, userRole }: HeaderProps) {
+export default function Header({ user, userRole, onMenuClick }: HeaderProps) {
     const router = useRouter()
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
 
@@ -39,11 +40,31 @@ export default function Header({ user, userRole }: HeaderProps) {
         window.location.reload() // Force full page reload to show selector
     }
 
+    const pathName = usePathname()
+
+    const getPageTitle = () => {
+        if (pathName === '/dashboard') return 'Dashboard'
+        if (pathName.startsWith('/dashboard/channels')) return 'Channels'
+        if (pathName.startsWith('/dashboard/videos')) return 'Videos'
+        if (pathName.startsWith('/dashboard/tasks')) return 'Tasks'
+        return 'Dashboard'
+    }
+
     return (
-        <header className="h-16 border-b border-border bg-background-elevated px-8 flex items-center justify-between">
+        <header className="h-16 border-b border-border bg-background-elevated px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 w-full">
             <div className="flex items-center gap-4">
-                <h1 className="text-xl font-medium text-text-primary">
-                    YouTube SEO Dashboard
+                {/* Mobile Menu Button */}
+                <button
+                    onClick={onMenuClick}
+                    className="md:hidden p-2 -ml-2 text-text-secondary hover:text-text-primary hover:bg-background-surface rounded-lg"
+                >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                <h1 className="text-2xl font-semibold text-text-primary">
+                    {getPageTitle()}
                 </h1>
             </div>
 

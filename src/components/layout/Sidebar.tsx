@@ -7,20 +7,39 @@ import { TeamMember } from '@/lib/team-member-types'
 
 interface SidebarProps {
     userRole: string
+    isOpen: boolean
+    onClose: () => void
 }
 
-export default function Sidebar({ userRole }: SidebarProps) {
+export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
     const pathname = usePathname()
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
 
     useEffect(() => {
-        const stored = localStorage.getItem('selected_team_member')
-        if (stored) {
-            try {
-                setSelectedMember(JSON.parse(stored))
-            } catch (e) {
-                console.error('Error parsing team member:', e)
+        const updateMember = () => {
+            const stored = localStorage.getItem('selected_team_member')
+            if (stored) {
+                try {
+                    setSelectedMember(JSON.parse(stored))
+                } catch (e) {
+                    console.error('Error parsing team member:', e)
+                }
+            } else {
+                setSelectedMember(null)
             }
+        }
+
+        // Initial load
+        updateMember()
+
+        // Listen for storage changes
+        window.addEventListener('storage', updateMember)
+        // Custom event for same-window updates
+        window.addEventListener('team-member-updated', updateMember)
+
+        return () => {
+            window.removeEventListener('storage', updateMember)
+            window.removeEventListener('team-member-updated', updateMember)
         }
     }, [])
 
@@ -48,55 +67,87 @@ export default function Sidebar({ userRole }: SidebarProps) {
             icon: TasksIcon,
             minRole: 'editor'
         },
+        {
+            name: 'Research',
+            href: '/dashboard/research',
+            icon: ResearchIcon,
+            minRole: 'viewer'
+        },
     ]
 
     const isActive = (href: string) => pathname === href
 
     return (
-        <aside className="w-64 bg-background-elevated border-r border-border flex flex-col">
-            {/* Logo */}
-            <div className="h-16 flex items-center px-6 border-b border-border">
-                <h2 className="text-lg font-medium text-text-primary">
-                    SEO Manager
-                </h2>
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-1">
-                {navItems.map((item) => {
-                    const Icon = item.icon
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`
-                flex items-center gap-3 px-4 py-3 rounded-lg
-                transition-smooth
-                ${isActive(item.href)
-                                    ? 'bg-accent/10 text-accent'
-                                    : 'text-text-secondary hover:text-text-primary hover:bg-background-surface'
-                                }
-              `}
-                        >
-                            <Icon className="w-5 h-5" />
-                            <span className="font-medium">{item.name}</span>
-                        </Link>
-                    )
-                })}
-            </nav>
-
-            {/* User Role Badge */}
-            <div className="p-4 border-t border-border">
-                <div className="px-4 py-2 bg-background-surface rounded-lg">
-                    <p className="text-xs text-text-tertiary uppercase tracking-wide">
-                        Role
-                    </p>
-                    <p className="text-sm text-text-primary font-medium capitalize mt-1">
-                        {userRole}
-                    </p>
+        <>
+            <aside className={`
+                w-64 bg-background-elevated border-r border-border flex flex-col
+                fixed inset-y-0 left-0 z-50
+                transform transition-transform duration-300 ease-in-out
+                md:relative md:translate-x-0
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
+                {/* Logo & Close Button */}
+                <div className="h-16 flex items-center justify-between px-6 border-b border-border">
+                    <h2 className="text-lg font-medium text-text-primary">
+                        SEO Manager
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="md:hidden p-1 text-text-secondary hover:text-text-primary"
+                    >
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-            </div>
-        </aside>
+
+                {/* Navigation */}
+                <nav className="flex-1 p-4 space-y-1">
+                    {navItems.map((item) => {
+                        // Check visibility based on role
+                        if (item.minRole === 'admin' && userRole !== 'admin') return null
+                        if (item.minRole === 'editor' && userRole === 'viewer') return null
+
+                        const Icon = item.icon
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => onClose()} // Close sidebar on selection (mobile)
+                                className={`
+                                    flex items-center gap-3 px-4 py-3 rounded-lg
+                                    transition-smooth
+                                    ${isActive(item.href)
+                                        ? 'bg-accent/10 text-accent'
+                                        : 'text-text-secondary hover:text-text-primary hover:bg-background-surface'
+                                    }
+                                `}
+                            >
+                                <Icon className="w-5 h-5" />
+                                <span className="font-medium">{item.name}</span>
+                            </Link>
+                        )
+                    })}
+                </nav>
+
+                {/* User Role Badge */}
+                <div className="p-4 border-t border-border">
+                    <div className="px-4 py-2 bg-background-surface rounded-lg">
+                        <p className="text-xs text-text-tertiary uppercase tracking-wide">
+                            {selectedMember ? 'Team Member' : 'Account Role'}
+                        </p>
+                        <p className="text-sm text-text-primary font-medium capitalize mt-1">
+                            {selectedMember ? selectedMember.role : userRole}
+                        </p>
+                        {selectedMember && (
+                            <p className="text-xs text-text-tertiary mt-1">
+                                {selectedMember.name}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </aside>
+        </>
     )
 }
 
@@ -132,3 +183,12 @@ function TasksIcon({ className }: { className?: string }) {
         </svg>
     )
 }
+
+function ResearchIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+    )
+}
+

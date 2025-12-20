@@ -8,7 +8,10 @@ export async function toggleSeoDone(videoId: string, currentStatus: boolean, wor
     const newStatus = !currentStatus
 
     // Prepare update data
-    const updateData: any = { is_seo_done: newStatus }
+    const updateData: any = {
+        is_seo_done: newStatus,
+        updated_at: new Date().toISOString()
+    }
 
     // If marking as done and workedBy is provided, set it
     if (newStatus && workedBy) {

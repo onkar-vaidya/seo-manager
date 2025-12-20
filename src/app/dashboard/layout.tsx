@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Sidebar from '@/components/layout/Sidebar'
-import Header from '@/components/layout/Header'
-import TeamMemberProvider from '@/components/auth/TeamMemberProvider'
+import DashboardLayoutClient from '@/components/layout/DashboardLayoutClient'
 
 export default async function DashboardLayout({
     children,
@@ -29,22 +27,11 @@ export default async function DashboardLayout({
     const finalRole = userRole?.role || defaultRole
 
     return (
-        <TeamMemberProvider>
-            <div className="flex h-screen overflow-hidden">
-                {/* Sidebar */}
-                <Sidebar userRole={finalRole} />
-
-                {/* Main Content Area */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    <Header user={user} userRole={finalRole} />
-
-                    <main className="flex-1 overflow-y-auto bg-background">
-                        <div className="max-w-7xl mx-auto p-8">
-                            {children}
-                        </div>
-                    </main>
-                </div>
+        <DashboardLayoutClient user={user} role={finalRole}>
+            {children}
+            <div className="hidden">
+                {/* Only load syncer when authenticated */}
             </div>
-        </TeamMemberProvider>
+        </DashboardLayoutClient>
     )
 }

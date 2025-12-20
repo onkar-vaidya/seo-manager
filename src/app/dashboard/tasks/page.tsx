@@ -73,7 +73,7 @@ export default function TasksPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-medium text-text-primary">Team Progress</h1>
+            {/* Header removed */}
 
             {/* Assignment Form */}
             <div className="glass rounded-xl p-6">

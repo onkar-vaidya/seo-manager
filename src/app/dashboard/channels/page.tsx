@@ -17,14 +17,7 @@ export default async function ChannelsPage() {
     return (
         <div className="space-y-8">
             {/* Page Header */}
-            <div>
-                <h1 className="text-3xl font-medium text-text-primary mb-2">
-                    Channels
-                </h1>
-                <p className="text-text-secondary">
-                    Manage your YouTube channels
-                </p>
-            </div>
+            {/* Page Header Removed */}
 
             {/* Channels Grid */}
             {channels && channels.length > 0 ? (

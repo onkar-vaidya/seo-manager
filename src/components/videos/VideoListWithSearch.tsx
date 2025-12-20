@@ -56,9 +56,10 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
     return (
         <div className="space-y-4">
             {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+            {/* Search and Filters */}
+            <div className="flex flex-col gap-4">
                 {/* Search Bar */}
-                <div className="relative flex-1">
+                <div className="relative w-full">
                     <input
                         type="text"
                         placeholder="Search by Video ID..."
@@ -78,52 +79,54 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
                     </svg>
                 </div>
 
-                {/* Filters - Right Side */}
-                <div className="flex items-center gap-3 flex-wrap">
-                    {/* SEO Status Filter */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-text-tertiary">SEO:</span>
-                        <button
-                            onClick={() => setSeoFilter('done')}
-                            className={`px-3 py-2 text-sm rounded-lg transition-smooth flex items-center gap-1 ${seoFilter === 'done'
+                {/* Filters Row */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+                    {/* SEO Status Filter - Horizontal Scroll for mobile */}
+                    <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-hide">
+                        <span className="text-sm text-text-tertiary whitespace-nowrap">SEO:</span>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setSeoFilter('done')}
+                                className={`px-3 py-2 text-sm rounded-lg transition-smooth flex items-center gap-1 whitespace-nowrap ${seoFilter === 'done'
                                     ? 'bg-success text-white'
                                     : 'bg-background-elevated text-text-secondary hover:bg-background-surface'
-                                }`}
-                        >
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            Done
-                        </button>
-                        <button
-                            onClick={() => setSeoFilter('not-done')}
-                            className={`px-3 py-2 text-sm rounded-lg transition-smooth flex items-center gap-1 ${seoFilter === 'not-done'
+                                    }`}
+                            >
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Done
+                            </button>
+                            <button
+                                onClick={() => setSeoFilter('not-done')}
+                                className={`px-3 py-2 text-sm rounded-lg transition-smooth flex items-center gap-1 whitespace-nowrap ${seoFilter === 'not-done'
                                     ? 'bg-warning text-white'
                                     : 'bg-background-elevated text-text-secondary hover:bg-background-surface'
-                                }`}
-                        >
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            Not Done
-                        </button>
-                        {seoFilter !== 'all' && (
-                            <button
-                                onClick={() => setSeoFilter('all')}
-                                className="px-2 py-2 text-xs text-text-tertiary hover:text-text-primary transition-smooth"
+                                    }`}
                             >
-                                Clear
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Not Done
                             </button>
-                        )}
+                            {seoFilter !== 'all' && (
+                                <button
+                                    onClick={() => setSeoFilter('all')}
+                                    className="px-2 py-2 text-xs text-text-tertiary hover:text-text-primary transition-smooth whitespace-nowrap"
+                                >
+                                    Clear
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Member Filter */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-text-tertiary">Assigned:</span>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <span className="text-sm text-text-tertiary whitespace-nowrap">Assigned:</span>
                         <select
                             value={memberFilter}
                             onChange={(e) => setMemberFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-background-elevated border border-border rounded-lg text-text-primary"
+                            className="flex-1 sm:flex-none px-3 py-2 text-sm bg-background-elevated border border-border rounded-lg text-text-primary min-w-[140px]"
                         >
                             <option value="all">All</option>
                             <option value="unassigned">Unassigned</option>

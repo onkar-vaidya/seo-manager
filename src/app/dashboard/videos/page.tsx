@@ -121,8 +121,8 @@ export default function VideosPage() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-medium text-text-primary">All Videos</h1>
-                <div className="flex items-center gap-3">
+                {/* Title removed */}
+                <div className="flex items-center gap-3 w-full justify-end">
                     {loading && (
                         <div className="flex items-center gap-2">
                             <div className="w-32 h-2 bg-background-elevated rounded-full overflow-hidden">
