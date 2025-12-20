@@ -147,7 +147,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
 
                 {/* User Profile Card */}
                 <div className="p-4 border-t border-border mt-auto">
-                    <div className="p-3 rounded-xl border border-border/40 bg-background-surface/30 hover:bg-background-surface hover:border-border/60 transition-all group">
+                    <div className="p-3 rounded-xl border border-white/5 bg-black/20 hover:bg-black/30 transition-all group">
                         <div className="flex items-center gap-3">
                             {/* Avatar - Updated Color */}
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated">
