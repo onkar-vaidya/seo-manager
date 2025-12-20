@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { TeamMember } from '@/lib/team-member-types'
 
 interface SidebarProps {
@@ -13,6 +14,7 @@ interface SidebarProps {
 
 export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
     const pathname = usePathname()
+    const router = useRouter()
     const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
 
     useEffect(() => {
@@ -75,6 +77,19 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
         },
     ]
 
+
+    const handleSignOut = async () => {
+        const supabase = createClient()
+        await supabase.auth.signOut()
+        localStorage.removeItem('selected_team_member')
+        router.push('/login')
+    }
+
+    const handleSwitchUser = () => {
+        localStorage.removeItem('selected_team_member')
+        window.location.reload()
+    }
+
     const isActive = (href: string) => pathname === href
 
     return (
@@ -88,8 +103,8 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
             `}>
                 {/* Logo & Close Button */}
                 <div className="h-16 flex items-center justify-between px-6 border-b border-border">
-                    <h2 className="text-lg font-medium text-text-primary">
-                        SEO Manager
+                    <h2 className="text-lg font-medium text-text-primary px-2">
+                        SEO Manager <span className="text-accent text-sm">X SooperBlooper</span>
                     </h2>
                     <button
                         onClick={onClose}
@@ -130,28 +145,51 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                     })}
                 </nav>
 
-                {/* User Role Badge */}
+                {/* User Profile Card */}
                 <div className="p-4 border-t border-border">
-                    <div className="flex items-center gap-3 p-3 bg-background-surface/50 rounded-xl border border-border/50 hover:bg-background-surface hover:border-border transition-all group cursor-default">
-                        {/* Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-accent/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated">
-                            {selectedMember
-                                ? selectedMember.name.charAt(0).toUpperCase()
-                                : userRole.charAt(0).toUpperCase()
-                            }
+                    <div className="p-3 bg-background-surface/50 rounded-xl border border-border/50 hover:bg-background-surface hover:border-border transition-all group">
+                        <div className="flex items-center gap-3">
+                            {/* Avatar - Updated Color */}
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated">
+                                {selectedMember
+                                    ? selectedMember.name.charAt(0).toUpperCase()
+                                    : userRole.charAt(0).toUpperCase()
+                                }
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-text-primary truncate transition-colors">
+                                    {selectedMember ? selectedMember.name : 'My Account'}
+                                </p>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+                                    <p className="text-xs text-text-tertiary font-medium capitalize truncate">
+                                        {selectedMember ? selectedMember.role : userRole}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-text-primary truncate group-hover:text-accent transition-colors">
-                                {selectedMember ? selectedMember.name : 'My Account'}
-                            </p>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
-                                <p className="text-xs text-text-tertiary font-medium capitalize truncate">
-                                    {selectedMember ? selectedMember.role : userRole}
-                                </p>
-                            </div>
+                        {/* Actions Row - Merged Below */}
+                        <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/50">
+                            <button
+                                onClick={handleSwitchUser}
+                                className="flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-background-elevated rounded-lg transition-colors"
+                                title="Switch User"
+                            >
+                                <SwitchUserIcon className="w-3.5 h-3.5" />
+                                <span>Switch</span>
+                            </button>
+                            <div className="w-px h-4 bg-border/50"></div>
+                            <button
+                                onClick={handleSignOut}
+                                className="flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium text-text-secondary hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                                title="Sign Out"
+                            >
+                                <SignOutIcon className="w-3.5 h-3.5" />
+                                <span>Sign Out</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -201,3 +239,18 @@ function ResearchIcon({ className }: { className?: string }) {
     )
 }
 
+function SignOutIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+    )
+}
+
+function SwitchUserIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        </svg>
+    )
+}

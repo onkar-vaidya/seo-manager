@@ -9,7 +9,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-    title: 'YouTube SEO Manager',
+    title: 'SEO Manager X SooperBlooper',
     description: 'Manage and optimize YouTube video SEO',
 }
 
