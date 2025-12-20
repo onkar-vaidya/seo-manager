@@ -180,55 +180,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                 {/* User Profile Card */}
                 <div className="p-4 border-t border-border mt-auto relative" ref={switcherRef}>
 
-                    {/* Popover User Switcher */}
-                    <AnimatePresence>
-                        {showSwitcher && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                animate={{ opacity: 1, y: -10, scale: 1 }}
-                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                transition={{ duration: 0.2 }}
-                                className="absolute bottom-full left-4 right-4 mb-2 bg-background-elevated/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-black/5"
-                                style={{
-                                    boxShadow: '0 0 40px -10px rgba(99, 102, 241, 0.3)' // Glow effect
-                                }}
-                            >
-                                <div className="p-2 space-y-1 max-h-60 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                                    <p className="px-2 py-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider">
-                                        Switch Account
-                                    </p>
-                                    {teamMembers.map((member) => (
-                                        <button
-                                            key={member.id}
-                                            onClick={() => handleSwitch(member)}
-                                            className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors
-                                                ${selectedMember?.id === member.id
-                                                    ? 'bg-accent/10 text-accent'
-                                                    : 'hover:bg-white/5 text-text-secondary hover:text-text-primary'
-                                                }
-                                            `}
-                                        >
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                                                ${selectedMember?.id === member.id
-                                                    ? 'bg-accent text-white shadow-sm'
-                                                    : 'bg-background-surface text-text-secondary'
-                                                }
-                                           `}>
-                                                {member.name.charAt(0).toUpperCase()}
-                                            </div>
-                                            <div className="flex-1 text-left">
-                                                <p className="text-sm font-medium leading-none">{member.name}</p>
-                                                <p className="text-[10px] opacity-70 mt-0.5 capitalize">{member.role}</p>
-                                            </div>
-                                            {selectedMember?.id === member.id && (
-                                                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+
 
                     <div className="p-3 rounded-xl border border-white/5 bg-black/20 hover:bg-black/30 transition-all group">
                         <div className="flex items-center gap-3">
@@ -256,19 +208,120 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
 
                         {/* Actions Row - Merged Below */}
                         <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/40">
-                            <button
-                                onClick={() => setShowSwitcher(!showSwitcher)}
-                                className={`flex-1 flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors
-                                    ${showSwitcher
-                                        ? 'text-accent bg-accent/10'
-                                        : 'text-text-secondary hover:text-text-primary hover:bg-background-elevated/50'
-                                    }
-                                `}
-                                title="Switch User"
-                            >
-                                <SwitchUserIcon className="w-3.5 h-3.5" />
-                                <span>Switch</span>
-                            </button>
+                            <div className="flex-1 relative">
+                                <AnimatePresence>
+                                    {showSwitcher && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95, transformOrigin: 'bottom left' }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            transition={{ duration: 0.2, ease: "easeOut" }}
+                                            className="absolute bottom-full left-0 w-[220px] mb-3 bg-background-elevated/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-black/5"
+                                            style={{
+                                                boxShadow: '0 0 40px -10px rgba(99, 102, 241, 0.3)'
+                                            }}
+                                        >
+                                            <div className="p-2 space-y-1 max-h-60 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                                                <p className="px-2 py-1.5 text-xs font-semibold text-text-tertiary uppercase tracking-wider">
+                                                    Switch Account
+                                                </p>
+                                                {teamMembers.map((member) => (
+                                                    <button
+                                                        key={member.id}
+                                                        onClick={() => handleSwitch(member)}
+                                                        className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors group
+                                                            ${selectedMember?.id === member.id
+                                                                ? 'bg-accent/10 text-accent'
+                                                                : 'hover:bg-white/5 text-text-secondary hover:text-text-primary'
+                                                            }
+                                                        `}
+                                                    >
+                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-transform group-hover:scale-105
+                                                            ${selectedMember?.id === member.id
+                                                                ? 'bg-accent text-white shadow-sm'
+                                                                : 'bg-background-surface text-text-secondary'
+                                                            }
+                                                       `}>
+                                                            {member.name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div className="flex-1 text-left min-w-0">
+                                                            <p className="text-sm font-medium leading-none truncate">{member.name}</p>
+                                                            <p className="text-[10px] opacity-70 mt-0.5 capitalize truncate">{member.role}</p>
+                                                        </div>
+                                                        {selectedMember?.id === member.id && (
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <button
+                                    onClick={() => setShowSwitcher(!showSwitcher)}
+                                    className={`w-full flex items-center justify-center gap-2 px-2 py-1.5 text-xs font-medium rounded-lg transition-all duration-300 overflow-hidden
+                                        ${showSwitcher
+                                            ? 'text-red-400 bg-red-400/10'
+                                            : 'text-text-secondary hover:text-text-primary hover:bg-background-elevated/50'
+                                        }
+                                    `}
+                                    title={showSwitcher ? "Close" : "Switch User"}
+                                >
+                                    <div className="relative w-4 h-4 flex items-center justify-center">
+                                        <AnimatePresence mode="wait">
+                                            {showSwitcher ? (
+                                                <motion.svg
+                                                    key="close-icon"
+                                                    initial={{ rotate: -90, opacity: 0 }}
+                                                    animate={{ rotate: 0, opacity: 1 }}
+                                                    exit={{ rotate: 90, opacity: 0 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="absolute w-3.5 h-3.5"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </motion.svg>
+                                            ) : (
+                                                <motion.div
+                                                    key="switch-icon"
+                                                    initial={{ rotate: 90, opacity: 0 }}
+                                                    animate={{ rotate: 0, opacity: 1 }}
+                                                    exit={{ rotate: -90, opacity: 0 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="absolute inset-0 flex items-center justify-center"
+                                                >
+                                                    <SwitchUserIcon className="w-3.5 h-3.5" />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+
+                                    <AnimatePresence mode="popLayout">
+                                        {!showSwitcher ? (
+                                            <motion.span
+                                                key="label-switch"
+                                                initial={{ x: -10, opacity: 0 }}
+                                                animate={{ x: 0, opacity: 1 }}
+                                                exit={{ x: 20, opacity: 0 }} // Swoosh to the right
+                                                transition={{ duration: 0.2 }}
+                                            >
+                                                Switch
+                                            </motion.span>
+                                        ) : (
+                                            <motion.span
+                                                key="label-close"
+                                                initial={{ x: -10, opacity: 0 }}
+                                                animate={{ x: 0, opacity: 1 }}
+                                                exit={{ x: 10, opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                            >
+                                                Close
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+                                </button>
+                            </div>
                             <div className="w-px h-3 bg-border/40"></div>
                             <button
                                 onClick={handleSignOut}
