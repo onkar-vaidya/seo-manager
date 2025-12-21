@@ -75,10 +75,25 @@ export default function TeamMemberSelector({ onSelect }: TeamMemberSelectorProps
                                         } ${isConfirming ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <span className="font-medium">{member.name}</span>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-black/20 overflow-hidden flex items-center justify-center shrink-0">
+                                                {member.avatar_url ? (
+                                                    <img
+                                                        src={member.avatar_url}
+                                                        alt={member.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-xs font-bold">
+                                                        {member.name.charAt(0).toUpperCase()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span className="font-medium">{member.name}</span>
+                                        </div>
                                         <span className={`text-xs px-2 py-1 rounded ${member.role === 'admin'
-                                            ? 'bg-accent/20 text-accent'
-                                            : 'bg-background-surface text-text-tertiary'
+                                            ? 'bg-white/10 text-white'
+                                            : 'bg-black/20 text-text-tertiary'
                                             }`}>
                                             {member.role}
                                         </span>

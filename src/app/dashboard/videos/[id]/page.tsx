@@ -108,31 +108,12 @@ export default async function VideoDetailPage({
             </div>
 
             {/* SEO Information - Simplified */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-4">
-                    <h2 className="text-2xl font-medium text-text-primary">
-                        SEO Content
-                    </h2>
-                    <SimpleSeoDisplay video={video} />
-                </div>
-
-                <div className="space-y-4">
-                    <h2 className="text-2xl font-medium text-text-primary">
-                        Task Management
-                    </h2>
-                    {task ? (
-                        <TaskPanel
-                            task={task}
-                            currentUserInfo={{ id: user?.id || '', role: userRole }}
-                        />
-                    ) : (
-                        <div className="glass rounded-xl p-6 text-center text-text-secondary">
-                            <p className="mb-4">No task associated with this video.</p>
-                            <InitializeTaskButton videoId={id} />
-                        </div>
-                    )}
-                </div>
-            </div>
+            <section className="space-y-4">
+                <h2 className="text-2xl font-medium text-text-primary">
+                    SEO Content
+                </h2>
+                <SimpleSeoDisplay video={video} />
+            </section>
         </div>
     )
 }

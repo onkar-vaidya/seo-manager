@@ -92,7 +92,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
             minRole: 'viewer'
         },
         {
-            name: 'Tasks',
+            name: 'Assign Task',
             href: '/dashboard/tasks',
             icon: TasksIcon,
             minRole: 'editor'
@@ -211,13 +211,21 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                                                     }
                                                 `}
                                             >
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-transform group-hover:scale-105
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-transform group-hover:scale-105 overflow-hidden
                                                     ${selectedMember?.id === member.id
                                                         ? 'bg-accent text-white shadow-sm'
                                                         : 'bg-background-surface text-text-secondary'
                                                     }
                                                `}>
-                                                    {member.name.charAt(0).toUpperCase()}
+                                                    {member.avatar_url ? (
+                                                        <img
+                                                            src={member.avatar_url}
+                                                            alt={member.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        member.name.charAt(0).toUpperCase()
+                                                    )}
                                                 </div>
                                                 <div className="flex-1 text-left min-w-0">
                                                     <p className="text-sm font-medium leading-none truncate">{member.name}</p>
@@ -262,11 +270,18 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
                     <div className="p-3 rounded-xl border border-white/5 bg-black/20 hover:bg-black/30 transition-all group relative z-10">
                         <div className="flex items-center gap-3">
                             {/* Avatar - Updated Color */}
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated">
-                                {selectedMember
-                                    ? selectedMember.name.charAt(0).toUpperCase()
-                                    : userRole.charAt(0).toUpperCase()
-                                }
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-background ring-offset-2 ring-offset-background-elevated overflow-hidden">
+                                {selectedMember?.avatar_url ? (
+                                    <img
+                                        src={selectedMember.avatar_url}
+                                        alt={selectedMember.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    selectedMember
+                                        ? selectedMember.name.charAt(0).toUpperCase()
+                                        : userRole.charAt(0).toUpperCase()
+                                )}
                             </div>
 
                             {/* Info */}

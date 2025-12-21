@@ -3,5 +3,6 @@ export interface TeamMember {
     name: string
     role: 'admin' | 'editor' | 'viewer'
     is_active: boolean
+    avatar_url?: string
     created_at?: string
 }
