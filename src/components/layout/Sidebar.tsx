@@ -95,7 +95,7 @@ export default function Sidebar({ userRole, isOpen, onClose }: SidebarProps) {
             name: 'Assign Task',
             href: '/dashboard/tasks',
             icon: TasksIcon,
-            minRole: 'editor'
+            minRole: 'viewer'
         },
         {
             name: 'Research',
