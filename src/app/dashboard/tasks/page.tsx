@@ -37,10 +37,36 @@ export default function TasksPage() {
             .eq('is_active', true)
             .order('name')
 
-        // Get all videos
-        const { data: videos } = await supabase
-            .from('video_seo')
-            .select('assigned_to, worked_by, is_seo_done')
+        // Get all videos (fetch in batches to handle >1000 rows)
+        let allVideos: any[] = []
+        let page = 0
+        const pageSize = 1000
+        let hasMore = true
+
+        while (hasMore) {
+            const { data: batch, error } = await supabase
+                .from('video_seo')
+                .select('assigned_to, worked_by, is_seo_done')
+                .range(page * pageSize, (page + 1) * pageSize - 1)
+
+            if (error) {
+                console.error('Error fetching videos:', error)
+                break
+            }
+
+            if (batch && batch.length > 0) {
+                allVideos = [...allVideos, ...batch]
+                if (batch.length < pageSize) {
+                    hasMore = false
+                } else {
+                    page++
+                }
+            } else {
+                hasMore = false
+            }
+        }
+
+        const videos = allVideos
 
         if (!members || !videos) {
             setLoading(false)
