@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import BackgroundActionProvider from '@/components/providers/BackgroundActionProvider'
 
 const inter = Inter({
     subsets: ['latin'],
@@ -21,7 +22,9 @@ export default function RootLayout({
     return (
         <html lang="en" className={inter.variable}>
             <body className="min-h-screen">
-                {children}
+                <BackgroundActionProvider>
+                    {children}
+                </BackgroundActionProvider>
             </body>
         </html>
     )
