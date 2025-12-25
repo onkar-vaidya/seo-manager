@@ -78,6 +78,9 @@ export default function ResearchConsole() {
                     timestamp: Date.now()
                 }
                 setMessages(prev => [...prev, aiMsg])
+            } else {
+                // Handle case where result is empty but no error
+                setIsTyping(false)
             }
         } catch (e) {
             setIsThinking(false)
@@ -258,20 +261,41 @@ export default function ResearchConsole() {
 // Helper Component for Typing Effect
 function TypewriterEffect({ text, onComplete }: { text: string, onComplete: () => void }) {
     const [displayedText, setDisplayedText] = useState('')
+    const onCompleteRef = useRef(onComplete)
+    const processedRef = useRef(false)
+
+    // Update callback ref
+    useEffect(() => {
+        onCompleteRef.current = onComplete
+    }, [onComplete])
 
     useEffect(() => {
+        // Reset if text changes
+        setDisplayedText('')
+        processedRef.current = false
+
+        if (!text) {
+            onCompleteRef.current()
+            return
+        }
+
         let index = 0
         const intervalId = setInterval(() => {
-            setDisplayedText((prev) => prev + text.charAt(index))
+            // Use callback to ensure we have latest state if needed, but here we just increment
             index++
-            if (index === text.length) {
+            setDisplayedText(text.slice(0, index))
+
+            if (index >= text.length) {
                 clearInterval(intervalId)
-                onComplete()
+                if (!processedRef.current) {
+                    processedRef.current = true
+                    onCompleteRef.current()
+                }
             }
         }, 10) // fast typing speed
 
         return () => clearInterval(intervalId)
-    }, [text, onComplete])
+    }, [text])
 
     return <div className="whitespace-pre-wrap leading-relaxed">{displayedText}</div>
 }
