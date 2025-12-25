@@ -48,7 +48,7 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
     const counts = useMemo(() => {
         return {
             done: videos.filter(v => v.is_seo_done).length,
-            notDone: videos.filter(v => v.is_seo_done !== true).length
+            notDone: videos.filter(v => !v.is_seo_done).length
         }
     }, [videos])
 
@@ -60,8 +60,8 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
             // Filter by SEO status
             const matchesSeoFilter =
                 seoFilter === 'all' ? true :
-                    seoFilter === 'done' ? video.is_seo_done === true :
-                        video.is_seo_done !== true
+                    seoFilter === 'done' ? !!video.is_seo_done :
+                        !video.is_seo_done
 
             // Filter by assigned member
             const matchesMemberFilter =
