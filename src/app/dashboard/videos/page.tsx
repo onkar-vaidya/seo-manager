@@ -122,8 +122,8 @@ export default function VideosPage() {
                 // Update progress
                 setLoadingProgress(Math.min(95, (allVideos.length / 2230) * 100))
 
-                // Show partial results immediately
-                setVideos(allVideos as any)
+                // Show partial results immediately - REMOVED to prevent crash
+                // setVideos(allVideos as any)
             } else {
                 hasMore = false
             }

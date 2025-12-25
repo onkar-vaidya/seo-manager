@@ -4,7 +4,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // List of available API keys for rotation
 // Keys are stored in .env.local as a comma-separated string
-const API_KEYS = (process.env.GEMINI_API_KEYS || '').split(',').filter(k => k.trim())
+const EnvKeys = process.env.GEMINI_API_KEYS || process.env.GOOGLE_API_KEY || ''
+const API_KEYS = EnvKeys.split(',').filter(k => k.trim())
 
 export type ResearchState = {
     result?: string

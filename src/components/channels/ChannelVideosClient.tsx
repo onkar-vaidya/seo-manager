@@ -98,8 +98,8 @@ export default function ChannelVideosClient({ channelId, initialVideos }: Channe
                 offset += batchSize
                 hasMore = batch.length === batchSize
 
-                // Update UI with partial results
-                setVideos(allVideos as any)
+                // Update UI with partial results - REMOVED to prevent crash
+                // setVideos(allVideos as any)
             } else {
                 hasMore = false
             }
