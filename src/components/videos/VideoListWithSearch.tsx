@@ -53,6 +53,20 @@ export default function VideoListWithSearch({ videos }: VideoListWithSearchProps
     }, [videos])
 
     const filteredVideos = useMemo(() => {
+        // DEBUG: Check if we have any assigned videos in the raw list
+        if (memberFilter !== 'all' && memberFilter !== 'unassigned') {
+            const assignedCount = videos.filter(v => v.assigned_to === memberFilter).length
+            console.log(`[Debug] Filtering for ${memberFilter}. Found ${assignedCount} matches in ${videos.length} videos.`)
+
+            // Check first few videos to see data structure
+            const sample = videos.find(v => v.assigned_to)
+            if (sample) {
+                console.log('[Debug] Sample video with assignment:', { id: sample.video_id, assigned_to: sample.assigned_to })
+            } else {
+                console.log('[Debug] No videos found with any assignment property in current batch')
+            }
+        }
+
         return videos.filter(video => {
             // Filter by search query
             const matchesSearch = video.video_id.toLowerCase().includes(deferredSearchQuery.toLowerCase())
