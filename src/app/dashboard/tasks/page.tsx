@@ -206,6 +206,13 @@ function AssignmentForm({ onAssigned, teamMembers }: { onAssigned: () => void, t
 
         if (result.success) {
             alert(`Assigned ${unassignedVideos.length} videos to ${selectedMember}`)
+
+            // Clear video cache to ensure updated assignments show in Videos page
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('all_videos_cache_v5')
+                localStorage.removeItem('all_videos_cache_time_v5')
+            }
+
             setSelectedMember('')
             setVideoCount(10)
             onAssigned()
