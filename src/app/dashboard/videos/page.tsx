@@ -66,8 +66,8 @@ export default function VideosPage() {
         const cached = localStorage.getItem('all_videos_cache_v5')
         const cacheTimestamp = localStorage.getItem('all_videos_cache_time_v5')
 
-        // Use cache if it's less than 24 hours old
-        if (cached && cacheTimestamp) {
+        // Use cache if it's less than 24 hours old AND not a hard reload
+        if (!isReload && cached && cacheTimestamp) {
             const cacheAge = Date.now() - parseInt(cacheTimestamp)
             if (cacheAge < 24 * 60 * 60 * 1000) {
                 console.log('Using cached videos')
@@ -79,6 +79,8 @@ export default function VideosPage() {
                 // The cache is now the source of truth until manual reload or expiry
                 return
             }
+        } else if (isReload) {
+            console.log('Hard refresh detected, bypassing cache')
         }
 
         // Fetch all videos in batches
