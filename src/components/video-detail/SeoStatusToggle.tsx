@@ -17,7 +17,7 @@ export default function SeoStatusToggle({ videoId, initialStatus }: SeoStatusTog
     useEffect(() => {
         try {
             // Check global cache first
-            const allVideosCache = localStorage.getItem('all_videos_cache_v4')
+            const allVideosCache = localStorage.getItem('all_videos_cache_v5')
             if (allVideosCache) {
                 const videos = JSON.parse(allVideosCache)
                 const cachedVideo = videos.find((v: any) => v.id === videoId)
@@ -32,7 +32,7 @@ export default function SeoStatusToggle({ videoId, initialStatus }: SeoStatusTog
             // Check channel cache as fallback (we don't easily know channelId here, 
             // but we can try iterating keys or just rely on global)
             // Note: The global cache update in handleToggle updates ALL relevant caches,
-            // so checking global `all_videos_cache_v4` is usually sufficient if the user
+            // so checking global `all_videos_cache_v5` is usually sufficient if the user
             // has visited the main list.
 
         } catch (e) {
@@ -74,14 +74,14 @@ export default function SeoStatusToggle({ videoId, initialStatus }: SeoStatusTog
 
     const updateVideoInCache = (updatedVideo: any) => {
         // Update all videos cache
-        const allVideosCache = localStorage.getItem('all_videos_cache_v4')
+        const allVideosCache = localStorage.getItem('all_videos_cache_v5')
         if (allVideosCache) {
             const videos = JSON.parse(allVideosCache)
             // Preserve channel relation by spreading existing video + update
             const index = videos.findIndex((v: any) => v.id === updatedVideo.id)
             if (index !== -1) {
                 videos[index] = { ...videos[index], ...updatedVideo }
-                localStorage.setItem('all_videos_cache_v4', JSON.stringify(videos))
+                localStorage.setItem('all_videos_cache_v5', JSON.stringify(videos))
             }
         }
 
