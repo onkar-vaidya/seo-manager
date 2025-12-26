@@ -9,8 +9,8 @@ export default function VideosPage() {
     // Initialize with cached data immediately
     const getCachedVideos = () => {
         if (typeof window === 'undefined') return []
-        const cached = localStorage.getItem('all_videos_cache_v4')
-        const cacheTimestamp = localStorage.getItem('all_videos_cache_time_v4')
+        const cached = localStorage.getItem('all_videos_cache_v5')
+        const cacheTimestamp = localStorage.getItem('all_videos_cache_time_v5')
 
         if (cached && cacheTimestamp) {
             const cacheAge = Date.now() - parseInt(cacheTimestamp)
@@ -46,7 +46,7 @@ export default function VideosPage() {
                     }
 
                     // Update cache immediately so it persists on navigation
-                    localStorage.setItem('all_videos_cache_v4', JSON.stringify(newVideos))
+                    localStorage.setItem('all_videos_cache_v5', JSON.stringify(newVideos))
                     return newVideos
                 }
                 return prevVideos
@@ -63,8 +63,8 @@ export default function VideosPage() {
             (window.performance?.getEntriesByType("navigation")[0] as PerformanceNavigationTiming)?.type === "reload"
 
         // Check if we have cached videos
-        const cached = localStorage.getItem('all_videos_cache_v4')
-        const cacheTimestamp = localStorage.getItem('all_videos_cache_time_v4')
+        const cached = localStorage.getItem('all_videos_cache_v5')
+        const cacheTimestamp = localStorage.getItem('all_videos_cache_time_v5')
 
         // Use cache if it's less than 24 hours old
         if (cached && cacheTimestamp) {
@@ -83,55 +83,74 @@ export default function VideosPage() {
 
         // Fetch all videos in batches
         const supabase = createClient()
-        // Fetch all videos at once (virtualization handles the rendering performance)
-        let batchSize = 1000
+
+        // Optimize: Fetch count first to calculate batches
+        const { count, error: countError } = await supabase
+            .from('video_seo')
+            .select('*', { count: 'exact', head: true })
+
+        if (countError || !count) {
+            console.error('Error fetching video count:', countError)
+            setLoading(false)
+            return
+        }
+
+        const batchSize = 1000
+        const totalBatches = Math.ceil(count / batchSize)
+        const batches = Array.from({ length: totalBatches }, (_, i) => i)
+
+        // Process batches in chunks to avoid overwhelming the browser/network
+        // Parallel fetching with concurrency limit of 3
+        const CONCURRENT_LIMIT = 3
         let allVideos: any[] = []
-        let offset = 0
-        let hasMore = true
 
-        while (hasMore) {
-            const { data: batch, error } = await supabase
-                .from('video_seo')
-                .select(`
-                    id,
-                    channel_id,
-                    video_id,
-                    old_title,
-                    is_seo_done,
-                    created_at,
-                    channels!inner (
+        for (let i = 0; i < batches.length; i += CONCURRENT_LIMIT) {
+            const currentBatchIndices = batches.slice(i, i + CONCURRENT_LIMIT)
+            const batchPromises = currentBatchIndices.map(async (batchIndex) => {
+                const from = batchIndex * batchSize
+                const to = from + batchSize - 1
+
+                const { data, error } = await supabase
+                    .from('video_seo')
+                    .select(`
                         id,
-                        channel_name,
-                        channel_id
-                    )
-                `)
-                .order('created_at', { ascending: false })
-                .range(offset, offset + batchSize - 1)
+                        channel_id,
+                        video_id,
+                        old_title,
+                        is_seo_done,
+                        created_at,
+                        assigned_to,
+                        channels!inner (
+                            id,
+                            channel_name,
+                            channel_id
+                        )
+                    `)
+                    .order('created_at', { ascending: false })
+                    .range(from, to)
 
-            if (error) {
-                console.error('Error fetching videos:', error)
-                break
-            }
+                if (error) throw error
+                return data || []
+            })
 
-            if (batch && batch.length > 0) {
-                allVideos = [...allVideos, ...batch]
-                offset += batchSize
-
-                hasMore = batch.length === batchSize
+            try {
+                const results = await Promise.all(batchPromises)
+                results.forEach(batchData => {
+                    allVideos = [...allVideos, ...batchData]
+                })
 
                 // Update progress
-                setLoadingProgress(Math.min(95, (allVideos.length / 2230) * 100))
-
-                // Show partial results immediately - REMOVED to prevent crash
-                // setVideos(allVideos as any)
-            } else {
-                hasMore = false
+                const progress = Math.min(95, (allVideos.length / count) * 100)
+                setLoadingProgress(progress)
+            } catch (err) {
+                console.error('Error fetching batch:', err)
+                // Continue with partial data if possible
             }
         }
 
         // Cache the results
-        localStorage.setItem('all_videos_cache_v4', JSON.stringify(allVideos))
-        localStorage.setItem('all_videos_cache_time_v4', Date.now().toString())
+        localStorage.setItem('all_videos_cache_v5', JSON.stringify(allVideos))
+        localStorage.setItem('all_videos_cache_time_v5', Date.now().toString())
 
         setVideos(allVideos as any)
         setLoadingProgress(100)
@@ -141,8 +160,8 @@ export default function VideosPage() {
 
     const handleForceRefresh = () => {
         // Clear cache
-        localStorage.removeItem('all_videos_cache_v4')
-        localStorage.removeItem('all_videos_cache_time_v4')
+        localStorage.removeItem('all_videos_cache_v5')
+        localStorage.removeItem('all_videos_cache_time_v5')
         // Trigger reload
         setVideos([])
         setLoading(true)
